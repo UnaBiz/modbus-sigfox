@@ -27,11 +27,11 @@ SoftwareSerial debugSerial(2, 3); // RX, TX
 //  See diris-a20.html, diris-a20.png, diris-a20.pdf.
 
 const int slaveID = 5;  //  Default Slave ID of the Modbus device.
-const int measurement_common_table_start = 50512;  //  In 16-bit words.
-const int measurement_common_table_size = 62;  //  In 16-bit words.
+const uint16_t measurement_common_table_start = 50512;  //  In 16-bit words.
+const uint16_t measurement_common_table_size = 62;  //  In 16-bit words.
 
-const int simple_voltage_v1 = 50520; //  50520: Simple voltage : V1 (V / 100, U32)
-const int frequency_f = 50526; //  50526: Frequency : F (Hz / 100, U32)
+const uint16_t simple_voltage_v1 = 50520; //  50520: Simple voltage : V1 (V / 100, U32)
+const uint16_t frequency_f = 50526; //  50526: Frequency : F (Hz / 100, U32)
 
 //  Instantiate ModbusMaster object
 ModbusMaster node;
