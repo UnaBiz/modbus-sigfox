@@ -99,6 +99,7 @@ void loop()
 
   //  Based on https://github.com/4-20ma/ModbusMaster
   //  and https://www.cooking-hacks.com/documentation/tutorials/modbus-module-shield-tutorial-for-arduino-raspberry-pi-intel-galileo/  static uint32_t i;
+  static uint32_t i;
   uint8_t j, result;
   uint16_t data[6];
   i++;
@@ -118,10 +119,15 @@ void loop()
   // do something with data if read is successful
   if (result == node.ku8MBSuccess)
   {
+    debugSerial.println("Read OK");
     for (j = 0; j < 6; j++)
     {
       data[j] = node.getResponseBuffer(j);
     }
+  }
+  else
+  {
+    debugSerial.println("Read failed");
   }
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
