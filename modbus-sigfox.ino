@@ -27,6 +27,9 @@ SoftwareSerial debugSerial(2, 3); // RX, TX
 //  See diris-a20.html, diris-a20.png, diris-a20.pdf.
 
 const int slaveID = 5;  //  Default Slave ID of the Modbus device.
+const int measurement_common_table_start = 50512;  //  In 16-bit words.
+const int measurement_common_table_size = 62;  //  In 16-bit words.
+
 const int simple_voltage_v1 = 50520; //  50520: Simple voltage : V1 (V / 100, U32)
 const int frequency_f = 50526; //  50526: Frequency : F (Hz / 100, U32)
 
@@ -101,33 +104,33 @@ void loop()
   //  and https://www.cooking-hacks.com/documentation/tutorials/modbus-module-shield-tutorial-for-arduino-raspberry-pi-intel-galileo/  static uint32_t i;
   static uint32_t i;
   uint8_t j, result;
-  uint16_t data[6];
+  int data_size = measurement_common_table_size;
+  uint16_t data[data_size];
   i++;
 
-  // set word 0 of TX buffer to least-significant word of counter (bits 15..0)
-  node.setTransmitBuffer(0, lowWord(i));
+  //  Read Measurement Common table to RX buffer.
+  debugSerial.print("Reading "); debugSerial.print(measurement_common_table_size);
+  debugSerial.print(" bytes at "); debugSerial.println(measurement_common_table_start);
+  result = node.readHoldingRegisters(measurement_common_table_start, measurement_common_table_size);
 
-  // set word 1 of TX buffer to most-significant word of counter (bits 31..16)
-  node.setTransmitBuffer(1, highWord(i));
-
-  // slave: write TX buffer to (2) 16-bit registers starting at register 0
-  result = node.writeMultipleRegisters(0, 2);
-
-  // slave: read (6) 16-bit registers starting at register 2 to RX buffer
-  result = node.readHoldingRegisters(2, 6);
-
-  // do something with data if read is successful
+  //  Do something with data if read is successful
   if (result == node.ku8MBSuccess)
   {
     debugSerial.println("Read OK");
-    for (j = 0; j < 6; j++)
-    {
+    for (j = 0; j < measurement_common_table_size; j++)
       data[j] = node.getResponseBuffer(j);
-    }
+
+    //  Print selected parameters.
+    debugSerial.print("simple_voltage_v1=");
+    debugSerial.println(data[simple_voltage_v1 - measurement_common_table_start]);
+
+    debugSerial.print("frequency_f=");
+    debugSerial.println(data[frequency_f - measurement_common_table_start]);
   }
   else
   {
-    debugSerial.println("Read failed");
+    debugSerial.print("Read failed: 0x");
+    debugSerial.println(result, HEX);
   }
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
@@ -151,6 +154,13 @@ void loop()
   //  Wait a while before looping. 10000 milliseconds = 10 seconds.
   delay(10000);
 }
+
+// set word 0 of TX buffer to least-significant word of counter (bits 15..0)
+//node.setTransmitBuffer(0, lowWord(i));
+// set word 1 of TX buffer to most-significant word of counter (bits 31..16)
+//node.setTransmitBuffer(1, highWord(i));
+// slave: write TX buffer to (2) 16-bit registers starting at register 0
+//result = node.writeMultipleRegisters(0, 2);
 
 /*
 Expected output:
