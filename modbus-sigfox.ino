@@ -119,18 +119,22 @@ void loop()
     debugSerial.println("Read OK");
     for (j = 0; j < measurement_common_table_size; j++)
       data[j] = node.getResponseBuffer(j);
+    msg = ""; uint16_t value;
 
-    //  Print selected parameters.
-    debugSerial.print("simple_voltage_v1=");
-    debugSerial.println(data[simple_voltage_v1 - measurement_common_table_start]);
+    //  Send selected parameters.
+    value = data[simple_voltage_v1 - measurement_common_table_start];
+    msg = msg + akeru.toHex(value);
+    debugSerial.print("simple_voltage_v1="); debugSerial.println(value);
 
-    debugSerial.print("frequency_f=");
-    debugSerial.println(data[frequency_f - measurement_common_table_start]);
+    value = data[frequency_f - measurement_common_table_start];
+    msg = msg + akeru.toHex(value);
+    debugSerial.print("frequency_f="); debugSerial.println(value);
   }
   else
   {
     debugSerial.print("Read failed: 0x");
     debugSerial.println(result, HEX);
+    msg = akeru.toHex(result);
   }
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
