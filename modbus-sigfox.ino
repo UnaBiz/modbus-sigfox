@@ -28,8 +28,8 @@ SoftwareSerial debugSerial(6, 7); // RX, TX
 //  See diris-a20.html, diris-a20.png, diris-a20.pdf.
 
 const int slaveID = 5;  //  Default Slave ID of the Modbus device.
-////const uint16_t measurement_common_table_start = 50512;  //  In 16-bit words.
-const uint16_t measurement_common_table_start = 768;  //  In 16-bit words.
+const uint16_t measurement_common_table_start = 50512;  //  In 16-bit words.
+////const uint16_t measurement_common_table_start = 768;  //  In 16-bit words.
 
 ////const uint16_t measurement_common_table_size = 62;  //  In 16-bit words.
 const uint16_t measurement_common_table_size = 2;  //  In 16-bit words.
@@ -37,8 +37,9 @@ const uint16_t measurement_common_table_size = 2;  //  In 16-bit words.
 const uint16_t simple_voltage_v1 = 50520; //  50520: Simple voltage : V1 (V / 100, U32)
 const uint16_t frequency_f = 50526; //  50526: Frequency : F (Hz / 100, U32)
 
-const int EN = 2;  //Definition RS485 shield enable terminal (the 2nd digital IO ports),
-//high for the sending state, the low level of receiving state
+//  RS485 shield enable terminal (D2 port)
+//  Set to high for the sending state, set to low for receiving state
+const int EN = 2;  
 
 //  Instantiate ModbusMaster object
 ModbusMaster node;
@@ -186,8 +187,8 @@ void loop()
   //  End SIGFOX Module Loop
   ////////////////////////////////////////////////////////////
 
-  //  Wait a while before looping. 5000 milliseconds = 10 seconds.
-  delay(5000);
+  //  Wait a while before looping.
+  delay(1000);  //  1 second.
 }
 
 /*
