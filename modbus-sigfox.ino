@@ -19,6 +19,7 @@
 //  FTDI RX -> Arduino D7
 //  FTDI GND -> Arduino GND
 
+#include <avr/pgmspace.h>
 #include <String.h>
 #include <SoftwareSerial.h>
 #include "unabiz-arduino-master/Akeru.h"
@@ -73,13 +74,13 @@ ModbusMaster node;  //  Instantiate ModbusMaster object
 String debugOutput = "";  //  Debug output buffer.
 
 void preTransmission() {
-  debugOutput.concat("Set rs485_transmit=high before transmit\r\n");
+  debugOutput.concat(F("Set rs485_transmit=high before transmit\r\n"));
   digitalWrite(rs485_transmit, HIGH);    //  Set to high: RS485 shield waiting to transmit data
 }
 
 void postTransmission() {
-  debugOutput.concat("Set rs485_transmit=low and delay before receive\r\n");
-  delayMicroseconds(660);  //  See http://www.gammon.com.au/forum/?id=11428
+  debugOutput.concat(F("Set rs485_transmit=low and delay before receive\r\n"));
+  delayMicroseconds(660);  //  Need to wait for last char to be sent. See http://www.gammon.com.au/forum/?id=11428
   digitalWrite(rs485_transmit, LOW);    //  Set to low: RS485 shield waiting to receive data
 }
 
@@ -114,9 +115,9 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
     debugOutput.concat(" words\r\n");
   } else {
     //  Else read in the page.
-    debugOutput.concat("Reading "); debugOutput.concat(register_page_size);
+    debugOutput.concat("Reading "); debugOutput.concat(max_register_page_size);
     debugOutput.concat(" words at "); debugOutput.concat(address); debugOutput.concat("\r\n");
-    uint8_t result = node.readHoldingRegisters(address, register_page_size);
+    uint8_t result = node.readHoldingRegisters(address, max_register_page_size);
     debugSerial.println(debugOutput); debugOutput = "";
     if (result != node.ku8MBSuccess) {
       //  Return the error.
@@ -131,11 +132,11 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
     //          Result size in bytes
     //             Result                  CRC
     register_page_address = address;
-    register_page_size = node.getResponseBuffer(2);
+    register_page_size = node.getResponseBuffer(0);
     debugSerial.print("Received "); debugSerial.print(register_page_size);
     debugSerial.println(" bytes");
     for (uint16_t j = 0; j < register_page_size; j++)
-      register_page_data[j] = node.getResponseBuffer(j + 3);
+      register_page_data[j] = node.getResponseBuffer(j + 1);
   }
   //  Copy from our buffer to caller's buffer.
   uint16_t size2 = size;
@@ -174,7 +175,7 @@ void setup()
   
   //  Initialize serial communication at 9600 bits per second:
   debugSerial.begin(9600);
-  debugSerial.println("Demo sketch for Akeru library :)");
+  debugSerial.println(F("Started modbus-sigfox"));
 #ifdef FORWARD_MODE
   forwardSerial.begin(9600);
 #endif  //  FORWARD_MODE
@@ -192,7 +193,7 @@ void setup()
   //  Communicate with Modbus slave over Serial (port 0).
   debugSerial.print("Communicating to Modbus Slave #"); debugSerial.println(slaveID);
   node.begin(slaveID, Serial);
-  //  Callbacks allow us to configure the RS485 transceiver correctly (set EN=high/low).
+  //  Callbacks allow us to configure the RS485 transceiver correctly (set rs485_transmit=high/low).
   node.preTransmission(preTransmission);
   node.postTransmission(postTransmission);
 

@@ -19,8 +19,8 @@ struct Register {
   const boolean transmit;  //  True if this register should be transmitted to SIGFOX.
 };
 
-const uint16_t max_register_size = 8;  //  TODO: Compute max number of words per field across all fields.
-const PROGMEM Register all_registers[] = {
+const uint16_t max_register_size = 58;  //  Computed max number of words per field across all fields.
+const Register all_registers[] = {  //  TODO: Move to Flash memory.
     { "simple_voltage_v1", 50520, 2, "V / 100", TYPE_U32, true },
     { "frequency_f", 50526, 2, "Hz / 100", TYPE_U32, true }
 };

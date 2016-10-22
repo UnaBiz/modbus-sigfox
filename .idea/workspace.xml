@@ -15,12 +15,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87fe155f-2624-46c5-b610-3d695e5f9d87" name="Default" comment="Added Forward Mode to integrate with Simply Modbus Master tool">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modbus-types.h" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/register.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp" afterPath="$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modbus-sigfox.ino" afterPath="$PROJECT_DIR$/modbus-sigfox.ino" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/unabiz-arduino-master/Akeru.cpp" afterPath="$PROJECT_DIR$/unabiz-arduino-master/Akeru.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/register.h" afterPath="$PROJECT_DIR$/register.h" />
     </list>
     <ignored path="modbus-sigfox.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -40,25 +37,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="modbus-sigfox.ino" pinned="false" current-in-tab="false">
+      <file leaf-file-name="modbus-sigfox.ino" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="214">
-              <caret line="235" column="0" selection-start-line="235" selection-start-column="0" selection-end-line="235" selection-end-column="0" />
-              <folding>
-                <element signature="e#994#1013#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="304">
+              <caret line="138" column="58" selection-start-line="138" selection-start-column="58" selection-end-line="138" selection-end-column="58" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="register.h" pinned="false" current-in-tab="true">
+      <file leaf-file-name="register.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/register.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+            <state relative-caret-position="-54">
+              <caret line="12" column="63" selection-start-line="12" selection-start-column="63" selection-end-line="12" selection-end-column="63" />
               <folding>
-                <element signature="e#211#251#0" expanded="true" />
+                <element signature="e#211#236#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -77,8 +72,18 @@
       <file leaf-file-name="ModbusMaster.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5238">
-              <caret line="291" column="12" selection-start-line="291" selection-start-column="12" selection-end-line="291" selection-end-column="12" />
+            <state relative-caret-position="451">
+              <caret line="90" column="24" selection-start-line="90" selection-start-column="17" selection-end-line="90" selection-end-column="33" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ModbusMaster.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-173">
+              <caret line="222" column="25" selection-start-line="222" selection-start-column="25" selection-end-line="222" selection-end-column="25" />
               <folding />
             </state>
           </provider>
@@ -105,8 +110,8 @@
         <option value="$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp" />
         <option value="$PROJECT_DIR$/unabiz-arduino-master/Akeru.cpp" />
         <option value="$PROJECT_DIR$/modbus-types.h" />
-        <option value="$PROJECT_DIR$/modbus-sigfox.ino" />
         <option value="$PROJECT_DIR$/register.h" />
+        <option value="$PROJECT_DIR$/modbus-sigfox.ino" />
       </list>
     </option>
   </component>
@@ -117,8 +122,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="540" />
-    <option name="y" value="32" />
+    <option name="x" value="180" />
+    <option name="y" value="46" />
     <option name="width" value="943" />
     <option name="height" value="1000" />
   </component>
@@ -380,7 +385,7 @@
       <option name="presentableId" value="Default" />
       <updated>1477117130310</updated>
       <workItem from="1477117131670" duration="35050000" />
-      <workItem from="1477159792706" duration="2747000" />
+      <workItem from="1477159792706" duration="4876000" />
     </task>
     <task id="LOCAL-00001" summary="Added Forward Mode to integrate with Simply Modbus Master tool">
       <created>1477131401753</created>
@@ -393,15 +398,15 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="37797000" />
+    <option name="totallyTimeSpent" value="39926000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="540" y="32" width="943" height="1000" extended-state="0" />
+    <frame x="180" y="46" width="943" height="1000" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24972376" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32936978" sideWeight="0.49613258" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936978" sideWeight="0.49613258" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936978" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936978" sideWeight="0.5038674" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -446,9 +451,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="432">
           <caret line="24" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
-          <folding>
-            <element signature="e#994#1013#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -457,7 +460,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#211#251#0" expanded="true" />
+            <element signature="e#211#236#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -501,14 +504,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5238">
-          <caret line="291" column="12" selection-start-line="291" selection-start-column="12" selection-end-line="291" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.CLion2016.2/system/cmake/generated/modbus-sigfox-3b8aa67f/3b8aa67f/Debug/modbus-sigfox_modbus-sigfox.ino.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="178">
@@ -525,23 +520,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
+    <entry file="file://$PROJECT_DIR$/register.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="235" column="0" selection-start-line="235" selection-start-column="0" selection-end-line="235" selection-end-column="0" />
+        <state relative-caret-position="-54">
+          <caret line="12" column="63" selection-start-line="12" selection-start-column="63" selection-end-line="12" selection-end-column="63" />
           <folding>
-            <element signature="e#994#1013#0" expanded="true" />
+            <element signature="e#211#236#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/register.h">
+    <entry file="file://$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="19" column="0" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
-          <folding>
-            <element signature="e#211#251#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="451">
+          <caret line="90" column="24" selection-start-line="90" selection-start-column="17" selection-end-line="90" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-173">
+          <caret line="222" column="25" selection-start-line="222" selection-start-column="25" selection-end-line="222" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="138" column="58" selection-start-line="138" selection-start-column="58" selection-end-line="138" selection-end-column="58" />
+          <folding />
         </state>
       </provider>
     </entry>
