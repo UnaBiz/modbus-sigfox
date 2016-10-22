@@ -30,7 +30,7 @@ Arduino library for communicating with Modbus slaves over RS232/485 (via RTU pro
 #include "ModbusMaster.h"
 ////
 #include <SoftwareSerial.h>
-extern SoftwareSerial debugSerial;
+extern String debugOutput;
 ////
 
 /* _____GLOBAL VARIABLES_____________________________________________________ */
@@ -585,6 +585,18 @@ uint8_t ModbusMaster::readWriteMultipleRegisters(uint16_t u16ReadAddress,
   return ModbusMasterTransaction(ku8MBReadWriteMultipleRegisters);
 }
 
+String toHex(byte c)
+{
+  byte *b = (byte*) & c;
+
+  String bytes = "";
+  if (b[0] <= 0xF) // single char
+  {
+    bytes.concat("0"); // add a "0" to make sure every byte is read correctly
+  }
+  bytes.concat(String(b[0], 16));
+  return bytes;
+}
 
 /* _____PRIVATE FUNCTIONS____________________________________________________ */
 /**
@@ -712,17 +724,15 @@ uint8_t ModbusMaster::ModbusMasterTransaction(uint8_t u8MBFunction)
   {
     _preTransmission();
   }
+  debugOutput.concat("Send:"); ////
   for (i = 0; i < u8ModbusADUSize; i++)
   {
     _serial->write(u8ModbusADU[i]);
-    ////
-    debugSerial.print(" ");
-    if (u8ModbusADU[i] < 16) debugSerial.print("0");
-    debugSerial.print(u8ModbusADU[i], HEX);
-    ////
+    debugOutput.concat(" ");  ////
+    debugOutput.concat(toHex(u8ModbusADU[i]));  ////
   }
-  debugSerial.println(""); ////
-  
+  debugOutput.concat("\r\n");  ////
+
   u8ModbusADUSize = 0;
   _serial->flush();    // flush transmit buffer
   if (_postTransmission)
@@ -731,6 +741,7 @@ uint8_t ModbusMaster::ModbusMasterTransaction(uint8_t u8MBFunction)
   }
   
   // loop until we run out of time or bytes, or an error occurs
+  debugOutput.concat("Receive:"); ////
   u32StartTime = millis();
   while (u8BytesLeft && !u8MBStatus)
   {
@@ -739,8 +750,11 @@ uint8_t ModbusMaster::ModbusMasterTransaction(uint8_t u8MBFunction)
 #if __MODBUSMASTER_DEBUG__
       digitalWrite(__MODBUSMASTER_DEBUG_PIN_A__, true);
 #endif
-      u8ModbusADU[u8ModbusADUSize++] = _serial->read();
+      byte b = _serial->read();
+      u8ModbusADU[u8ModbusADUSize++] = b;
       u8BytesLeft--;
+      debugOutput.concat(" ");  ////
+      debugOutput.concat(toHex(b));  ////
 #if __MODBUSMASTER_DEBUG__
       digitalWrite(__MODBUSMASTER_DEBUG_PIN_A__, false);
 #endif

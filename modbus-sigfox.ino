@@ -15,11 +15,19 @@
 ////////////////////////////////////////////////////////////
 //  Begin Sensor Declaration
 
+#ifdef FORWARD_MODE
+//  In Forward Mode, input/output on this port will be forwarded to RS485.
+//  Used for allowing Simply Mobbus Master tool to communicate with real device.
+SoftwareSerial forwardSerial(6, 7); // RX, TX
+SoftwareSerial debugSerial(8, 9); // RX, TX.  Fake the ports so that debug is discarded.
+
+#else  //  FORWARD_NODE
 //  Need a debug serial port, because the USB port UART is used by RS485.
 //  Connect an FTDI 5V UART-to-USB adapter (e.g. uUSB-PA5) to Arduino D6, D7 and GND.
 //  FTDI TX -> Arduino D6, FTDI RX -> Arduino D7, FTDI GND -> Arduino GND. 
 //  Don't use D2 because it's used by RS485 shield in manual transmission mode.
 SoftwareSerial debugSerial(6, 7); // RX, TX
+#endif  //  FORWARD_NODE
 
 //  Parameters for DIRIS A20 based on:
 //  http://www.socomec.com/range-single-circuit-multifunction-meters_en.html?product=/diris-a20_en.html&view=documentation
@@ -28,7 +36,7 @@ SoftwareSerial debugSerial(6, 7); // RX, TX
 //  See diris-a20.html, diris-a20.png, diris-a20.pdf.
 
 const int slaveID = 5;  //  Default Slave ID of the Modbus device.
-const uint16_t measurement_common_table_start = 50512;  //  In 16-bit words.
+const uint16_t measurement_common_table_start = 50000;  //  In 16-bit words.
 ////const uint16_t measurement_common_table_start = 768;  //  In 16-bit words.
 
 ////const uint16_t measurement_common_table_size = 62;  //  In 16-bit words.
@@ -44,16 +52,33 @@ const int EN = 2;
 //  Instantiate ModbusMaster object
 ModbusMaster node;
 
+//  Debug output buffer.
+String debugOutput = "";
+
 void preTransmission()
 {
-  debugSerial.println("Set EN=high before transmit");
+  debugOutput.concat("Set EN=high before transmit\r\n");
   digitalWrite(EN, HIGH);    //  Set EN=high, RS485 shield waiting to transmit data
 }
 void postTransmission()
 {
-  debugSerial.println("Set EN=low before receive");
+  debugOutput.concat("Set EN=low and delay before receive\r\n");
+  delayMicroseconds(660);
   digitalWrite(EN, LOW);    //  Set EN=low, RS485 shield waiting to receive data
 }
+
+#ifdef FORWARD_MODE
+void forwardLoop()
+{
+  //  Forward input from forwardSerial to RS485.  Forward output from RS485 to forwardSerial.
+  if (forwardSerial.available()) {
+    Serial.write(forwardSerial.read());
+  }
+  if (Serial.available()) {
+    forwardSerial.write((uint8_t) Serial.read());
+  }
+}
+#endif
 
 //  End Sensor Declaration
 ////////////////////////////////////////////////////////////
@@ -79,6 +104,9 @@ void setup()
   //  Initialize serial communication at 9600 bits per second:
   debugSerial.begin(9600);
   debugSerial.println("Demo sketch for Akeru library :)");
+#ifdef FORWARD_MODE
+  forwardSerial.begin(9600);
+#endif  //  FORWARD_MODE
 
   //  End General Setup
   ////////////////////////////////////////////////////////////
@@ -126,6 +154,11 @@ void loop()
   ////////////////////////////////////////////////////////////
   //  Begin Sensor Loop
 
+#ifdef FORWARD_MODE
+  //  In Forward Mode: Forward input from forwardSerial to RS485.  Forward output from RS485 to forwardSerial.
+  return forwardLoop();
+
+#else  //  FORWARD_MODE
   //  Prepare sensor data.  Must not exceed 12 characters.
   String msg = "t:0,h:0";
 
@@ -138,12 +171,13 @@ void loop()
   loop_count++;
 
   //  Read Measurement Common table to RX buffer.
-  debugSerial.print("[ "); debugSerial.print(loop_count); debugSerial.print(" ] "); 
-  debugSerial.print("Reading "); debugSerial.print(measurement_common_table_size);
-  debugSerial.print(" bytes at "); debugSerial.println(measurement_common_table_start);
+  debugOutput.concat("[ "); debugOutput.concat(loop_count); debugOutput.concat(" ] ");
+  debugOutput.concat("Reading "); debugOutput.concat(measurement_common_table_size);
+  debugOutput.concat(" bytes at "); debugOutput.concat(measurement_common_table_start); debugOutput.concat("\r\n");
   result = node.readHoldingRegisters(measurement_common_table_start, measurement_common_table_size);
 
-  //  Do something with data if read is successful
+  //  Do something with data if read is successful.
+  debugSerial.println(debugOutput); debugOutput = "";
   if (result == node.ku8MBSuccess)
   {
     debugSerial.println("Read OK");
@@ -168,6 +202,8 @@ void loop()
     debugSerial.println(result, HEX);
     msg = akeru.toHex(result);
   }
+#endif  //  FORWARD_MODE
+
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
 
@@ -322,5 +358,8 @@ The CRC in the response does not match the one calculated.
 
 /*
 Expected output:
+
+2016/10/22 16:13:44  >>> 05 03 27 0F 00 02 FF 38
+
 */
 
