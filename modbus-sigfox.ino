@@ -8,10 +8,16 @@
 //  Modbus Device + -> RS485 Shield A
 //  Modbus Device - -> RS485 Shield B
 //  Modbus Device 0 -> RS485 Shield GND
+//  RS485 shield mode must be switched to Manual, not Auto
 
 //  Need a debug serial port, because the USB port UART is used by RS485.
 //  To download the sketch, turn the RS485 shield off using the ON-OFF switch on the shield.
 //  Then restart the board and switch the RS485 shield on.
+
+//  Connect an FTDI 5V UART-to-USB adapter (e.g. uUSB-PA5) to Arduino D6, D7 and GND.
+//  FTDI TX -> Arduino D6
+//  FTDI RX -> Arduino D7
+//  FTDI GND -> Arduino GND
 
 #include <SoftwareSerial.h>
 #include "unabiz-arduino-master/Akeru.h"
@@ -40,16 +46,18 @@ SoftwareSerial debugSerial(6, 7); // RX, TX
 //  http://www.socomec.com/files/live/sites/systemsite/files/SCP/6_gestion_energie/diris/diris_a20/PRO_880103_DirisA20.html
 //  See diris-a20.html, diris-a20.png, diris-a20.pdf.
 
-const int slaveID = 5;  //  Default Slave ID of the Modbus device.
+struct Register {
+  uint16_t address;
+  uint16_t size;
+};
+
 const uint16_t table_offset = 40001;  //  Subtract this from all register addresses.
-const uint16_t measurement_common_table_start = 50000;  //  In 16-bit words.
-////const uint16_t measurement_common_table_start = 768;  //  In 16-bit words.
+const Register simple_voltage_v1 = { address: 50520, size: 2 }; //  Simple voltage : V1 (V / 100, U32)
+const Register frequency_f = { address: 50526, size: 2 }; //  Frequency : F (Hz / 100, U32)
+//const uint16_t measurement_common_table_start = 50000;  //  In 16-bit words.
+//const uint16_t measurement_common_table_size = 2;  //  In 16-bit words.
 
-////const uint16_t measurement_common_table_size = 62;  //  In 16-bit words.
-const uint16_t measurement_common_table_size = 2;  //  In 16-bit words.
-
-const uint16_t simple_voltage_v1 = 50520; //  50520: Simple voltage : V1 (V / 100, U32)
-const uint16_t frequency_f = 50526; //  50526: Frequency : F (Hz / 100, U32)
+const int slaveID = 5;  //  Default Slave ID of the Modbus device.
 
 //  RS485 shield enable terminal (D2 port)
 //  Set to high for the sending state, set to low for receiving state
@@ -83,6 +91,29 @@ void forwardLoop()
   if (Serial.available()) {
     forwardSerial.write((uint8_t) Serial.read());
   }
+}
+#else
+uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
+  //  Read Modbus holding register at specified address and size to data buffer.
+  const uint16_t data_start = address - table_offset;
+  debugOutput.concat("Reading "); debugOutput.concat(size);
+  debugOutput.concat(" bytes at "); debugOutput.concat(data_start); debugOutput.concat("\r\n");
+  uint8_t result = node.readHoldingRegisters(data_start, size);
+
+  //  Process data read if successful.
+  debugSerial.println(debugOutput); debugOutput = "";
+  if (result == node.ku8MBSuccess)
+  {
+    debugSerial.println("Read OK");
+    for (uint16_t j = 0; j < size; j++)
+      data[j] = node.getResponseBuffer(j);
+  }
+  else
+  {
+    debugSerial.print("Read failed: 0x");
+    debugSerial.println(result, HEX);
+  }
+  return result;
 }
 #endif
 
@@ -166,49 +197,33 @@ void loop()
 
 #else  //  FORWARD_MODE
   //  Prepare sensor data.  Must not exceed 12 characters.
-  String msg = "t:0,h:0";
-
   //  Based on https://github.com/4-20ma/ModbusMaster
   //  and https://www.cooking-hacks.com/documentation/tutorials/modbus-module-shield-tutorial-for-arduino-raspberry-pi-intel-galileo/  static uint32_t i;
+  String msg = "";
   static uint32_t loop_count = 0;
   uint8_t j, result;
-  int data_size = measurement_common_table_size;
+  int data_size = 2;
   uint16_t data[data_size];
-  loop_count++;
 
-  //  Read Measurement Common table to RX buffer.
-  const uint16_t table_start = measurement_common_table_start - table_offset;
-  debugOutput.concat("[ "); debugOutput.concat(loop_count); debugOutput.concat(" ] ");
-  debugOutput.concat("Reading "); debugOutput.concat(measurement_common_table_size);
-  debugOutput.concat(" bytes at "); debugOutput.concat(table_start); debugOutput.concat("\r\n");
-  result = node.readHoldingRegisters(table_start, measurement_common_table_size);
-
-  //  Do something with data if read is successful.
-  debugSerial.println(debugOutput); debugOutput = "";
+  //  Read Modbus parameter to RX buffer.
+  debugOutput.concat("[ "); debugOutput.concat(loop_count++); debugOutput.concat(" ] ");
+  result = readHoldingRegisters(simple_voltage_v1.address, simple_voltage_v1.size, data);
   if (result == node.ku8MBSuccess)
   {
-    debugSerial.println("Read OK");
-    for (j = 0; j < measurement_common_table_size; j++)
-      data[j] = node.getResponseBuffer(j);
-    msg = ""; uint16_t value;
-
-    //  Send selected parameters.
-    ////value = data[simple_voltage_v1 - measurement_common_table_start];
-    value = data[0];
-    msg = msg + akeru.toHex(value);
-    debugSerial.print("simple_voltage_v1="); debugSerial.println(value);
-
-    ////value = data[frequency_f - measurement_common_table_start];
-    value = data[0];
-    msg = msg + akeru.toHex(value);
-    debugSerial.print("frequency_f="); debugSerial.println(value);
+    //  Send data to SIGFOX.
+    msg.concat(akeru.toHex(data[0]));
+    debugSerial.print("simple_voltage_v1="); debugSerial.println(data[0]);
   }
-  else
+  else msg = msg + akeru.toHex(result);  //  Send error byte to SIGFOX.
+
+  result = readHoldingRegisters(frequency_f.address, frequency_f.size, data);
+  if (result == node.ku8MBSuccess)
   {
-    debugSerial.print("Read failed: 0x");
-    debugSerial.println(result, HEX);
-    msg = akeru.toHex(result);
+    //  Send data to SIGFOX.
+    msg.concat(akeru.toHex(data[0]));
+    debugSerial.print("frequency_f="); debugSerial.println(data[0]);
   }
+  else msg = msg + akeru.toHex(result);  //  Send error byte to SIGFOX.
 #endif  //  FORWARD_MODE
 
   //  End Sensor Loop
