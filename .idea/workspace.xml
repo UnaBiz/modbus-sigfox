@@ -14,7 +14,7 @@
     </ADDITIONAL_GENERATION_ENVIRONMENT>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="87fe155f-2624-46c5-b610-3d695e5f9d87" name="Default" comment="">
+    <list default="true" id="87fe155f-2624-46c5-b610-3d695e5f9d87" name="Default" comment="Added Forward Mode to integrate with Simply Modbus Master tool">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modbus-sigfox.ino" afterPath="$PROJECT_DIR$/modbus-sigfox.ino" />
     </list>
     <ignored path="modbus-sigfox.iws" />
@@ -38,14 +38,14 @@
       <file leaf-file-name="modbus-sigfox.ino" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="727">
-              <caret line="368" column="0" selection-start-line="368" selection-start-column="0" selection-end-line="368" selection-end-column="0" />
+            <state relative-caret-position="-198">
+              <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding>
-                <element signature="e#597#624#0" expanded="true" />
-                <element signature="e#821#1111#0" expanded="true" />
-                <element signature="e#3234#3511#0" expanded="true" />
-                <element signature="e#4247#4273#0" expanded="true" />
-                <element signature="e#5735#5867#0" expanded="true" />
+                <element signature="e#768#795#0" expanded="true" />
+                <element signature="e#992#1282#0" expanded="true" />
+                <element signature="e#3405#3682#0" expanded="true" />
+                <element signature="e#4418#4444#0" expanded="true" />
+                <element signature="e#5906#6038#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -177,7 +177,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1477117130310</updated>
-      <workItem from="1477117131670" duration="10956000" />
+      <workItem from="1477117131670" duration="11432000" />
     </task>
     <task id="LOCAL-00001" summary="Added Forward Mode to integrate with Simply Modbus Master tool">
       <created>1477131401753</created>
@@ -190,7 +190,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="10956000" />
+    <option name="totallyTimeSpent" value="11432000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="5" y="21" width="943" height="1000" extended-state="0" />
@@ -260,14 +260,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="727">
-          <caret line="368" column="0" selection-start-line="368" selection-start-column="0" selection-end-line="368" selection-end-column="0" />
+        <state relative-caret-position="-198">
+          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding>
-            <element signature="e#597#624#0" expanded="true" />
-            <element signature="e#821#1111#0" expanded="true" />
-            <element signature="e#3234#3511#0" expanded="true" />
-            <element signature="e#4247#4273#0" expanded="true" />
-            <element signature="e#5735#5867#0" expanded="true" />
+            <element signature="e#768#795#0" expanded="true" />
+            <element signature="e#992#1282#0" expanded="true" />
+            <element signature="e#3405#3682#0" expanded="true" />
+            <element signature="e#4418#4444#0" expanded="true" />
+            <element signature="e#5906#6038#0" expanded="true" />
           </folding>
         </state>
       </provider>

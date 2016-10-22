@@ -4,6 +4,11 @@
 //  https://www.dfrobot.com/wiki/index.php/RS485_Shield
 //  http://www.4dsystems.com.au/product/uUSB_PA5/
 
+//  Connect Modbus device to RS485 shield as follows:
+//  Modbus Device + -> RS485 Shield A
+//  Modbus Device - -> RS485 Shield B
+//  Modbus Device 0 -> RS485 Shield GND
+
 //  Need a debug serial port, because the USB port UART is used by RS485.
 //  To download the sketch, turn the RS485 shield off using the ON-OFF switch on the shield.
 //  Then restart the board and switch the RS485 shield on.
@@ -363,7 +368,12 @@ Expected output:
 2016/10/22 16:13:44  >>> 05 03 27 0F 00 02 FF 38
 
 Actual:
+[ 1 ] Reading 2 bytes at 9999
+Set EN=high before transmit
 Send: 05 03 27 0f 00 02 ff 38
+Set EN=low and delay before receive
+Receive: 05 83 02 81 30
+Read failed: 0x2
 
 */
 
