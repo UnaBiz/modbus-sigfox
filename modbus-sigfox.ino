@@ -42,16 +42,20 @@ SoftwareSerial debugSerial(6, 7); // RX, TX
 
 //  Parameters for DIRIS A20 based on:
 //  http://www.socomec.com/range-single-circuit-multifunction-meters_en.html?product=/diris-a20_en.html&view=documentation
+//  http://www.socomec.com/files/live/sites/systemsite/files/DOCUMENTATION/SCP_hors_cata/fip_11013.pdf
 //  http://www.socomec.com/files/live/sites/systemsite/files/SCP/6_gestion_energie/diris/diris_a20/535746a_A20.pdf
 //  http://www.socomec.com/files/live/sites/systemsite/files/SCP/6_gestion_energie/diris/diris_a20/PRO_880103_DirisA20.html
-//  See diris-a20.html, diris-a20.png, diris-a20.pdf.
+//  http://www.socomec.com/files/live/sites/systemsite/files/SCP/6_gestion_energie/diris/diris_a40/876_581_C.pdf
+//  See diris-a20.html, diris-a20.png, diris-a20.pdf, diris-a20-operating-inst.pdf, diris-rs485-technical-guide.pdf.
 
 struct Register {
+  //  Every Modbus register is defined by its address and size.
   uint16_t address;
-  uint16_t size;
+  uint16_t size;  //  In 16-bit words.
 };
 
-const uint16_t table_offset = 40001;  //  Subtract this from all register addresses.
+//const uint16_t table_offset = 40001;  //  Subtract this from all register addresses.
+const uint16_t table_offset = 0;  //  Subtract this from all register addresses.
 const Register simple_voltage_v1 = { address: 50520, size: 2 }; //  Simple voltage : V1 (V / 100, U32)
 const Register frequency_f = { address: 50526, size: 2 }; //  Frequency : F (Hz / 100, U32)
 //const uint16_t measurement_common_table_start = 50000;  //  In 16-bit words.
@@ -97,7 +101,7 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
   //  Read Modbus holding register at specified address and size to data buffer.
   const uint16_t data_start = address - table_offset;
   debugOutput.concat("Reading "); debugOutput.concat(size);
-  debugOutput.concat(" bytes at "); debugOutput.concat(data_start); debugOutput.concat("\r\n");
+  debugOutput.concat(" words at "); debugOutput.concat(data_start); debugOutput.concat("\r\n");
   uint8_t result = node.readHoldingRegisters(data_start, size);
 
   //  Process data read if successful.
