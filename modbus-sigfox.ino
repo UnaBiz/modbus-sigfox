@@ -205,13 +205,13 @@ void loop()
   //  and https://www.cooking-hacks.com/documentation/tutorials/modbus-module-shield-tutorial-for-arduino-raspberry-pi-intel-galileo/  static uint32_t i;
   String msg = "";
   static uint32_t loop_count = 0;
-  uint8_t j, result;
-  int data_size = 2;
+  uint8_t result;
+  uint16_t data_size = 4 * (loop_count + 1);
   uint16_t data[data_size];
 
   //  Read Modbus parameter to RX buffer.
   debugOutput.concat("[ "); debugOutput.concat(loop_count++); debugOutput.concat(" ] ");
-  result = readHoldingRegisters(simple_voltage_v1.address, simple_voltage_v1.size, data);
+  result = readHoldingRegisters(simple_voltage_v1.address, data_size, data);
   if (result == node.ku8MBSuccess)
   {
     //  Send data to SIGFOX.
