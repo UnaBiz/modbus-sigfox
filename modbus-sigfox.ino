@@ -19,9 +19,23 @@
 //  FTDI RX -> Arduino D7
 //  FTDI GND -> Arduino GND
 
+#include <String.h>
 #include <SoftwareSerial.h>
 #include "unabiz-arduino-master/Akeru.h"
 #include "ModbusMaster/src/ModbusMaster.h"
+#include "modbus-types.h"
+#include "register.h"
+
+////////////////////////////////////////////////////////////
+//  Begin SIGFOX Module Declaration
+
+// SIGFOX module I/O definition
+#define TX 5  //  For UnaBiz / Akene
+#define RX 4  //  For UnaBiz / Akene
+Akeru akeru(RX, TX);  // Instance of SIGFOX module.
+
+//  End SIGFOX Module Declaration
+////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
 //  Begin Sensor Declaration
@@ -48,46 +62,29 @@ SoftwareSerial debugSerial(6, 7); // RX, TX
 //  http://www.socomec.com/files/live/sites/systemsite/files/SCP/6_gestion_energie/diris/diris_a40/876_581_C.pdf
 //  See diris-a20.html, diris-a20.png, diris-a20.pdf, diris-a20-operating-inst.pdf, diris-rs485-technical-guide.pdf.
 
-struct Register {
-  //  Every Modbus register is defined by its address and size.
-  uint16_t address;
-  uint16_t size;  //  In 16-bit words.
-};
+//  List of registers to be read and transmitted optionally.
+const uint16_t all_registers_count = sizeof(all_registers) / sizeof(Register);
 
-//const uint16_t table_offset = 40001;  //  Subtract this from all register addresses.
-const uint16_t table_offset = 0;  //  Subtract this from all register addresses.
-const Register simple_voltage_v1 = { address: 50520, size: 2 }; //  Simple voltage : V1 (V / 100, U32)
-const Register frequency_f = { address: 50526, size: 2 }; //  Frequency : F (Hz / 100, U32)
-//const uint16_t measurement_common_table_start = 50000;  //  In 16-bit words.
-//const uint16_t measurement_common_table_size = 2;  //  In 16-bit words.
-
-const int slaveID = 5;  //  Default Slave ID of the Modbus device.
-
-//  RS485 shield enable terminal (D2 port)
+//  Use D2 port as flow control for RS485 shield.
 //  Set to high for the sending state, set to low for receiving state
-const int EN = 2;  
+const int rs485_transmit = 2;
+const int slaveID = 5;  //  Default Slave ID of the Modbus device.
+ModbusMaster node;  //  Instantiate ModbusMaster object
+String debugOutput = "";  //  Debug output buffer.
 
-//  Instantiate ModbusMaster object
-ModbusMaster node;
-
-//  Debug output buffer.
-String debugOutput = "";
-
-void preTransmission()
-{
-  debugOutput.concat("Set EN=high before transmit\r\n");
-  digitalWrite(EN, HIGH);    //  Set EN=high, RS485 shield waiting to transmit data
+void preTransmission() {
+  debugOutput.concat("Set rs485_transmit=high before transmit\r\n");
+  digitalWrite(rs485_transmit, HIGH);    //  Set to high: RS485 shield waiting to transmit data
 }
-void postTransmission()
-{
-  debugOutput.concat("Set EN=low and delay before receive\r\n");
-  delayMicroseconds(660);
-  digitalWrite(EN, LOW);    //  Set EN=low, RS485 shield waiting to receive data
+
+void postTransmission() {
+  debugOutput.concat("Set rs485_transmit=low and delay before receive\r\n");
+  delayMicroseconds(660);  //  See http://www.gammon.com.au/forum/?id=11428
+  digitalWrite(rs485_transmit, LOW);    //  Set to low: RS485 shield waiting to receive data
 }
 
 #ifdef FORWARD_MODE
-void forwardLoop()
-{
+void forwardLoop() {
   //  Forward input from forwardSerial to RS485.  Forward output from RS485 to forwardSerial.
   if (forwardSerial.available()) {
     Serial.write(forwardSerial.read());
@@ -97,44 +94,77 @@ void forwardLoop()
   }
 }
 #else
-uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
-  //  Read Modbus holding register at specified address and size to data buffer.
-  const uint16_t data_start = address - table_offset;
-  debugOutput.concat("Reading "); debugOutput.concat(size);
-  debugOutput.concat(" words at "); debugOutput.concat(data_start); debugOutput.concat("\r\n");
-  uint8_t result = node.readHoldingRegisters(data_start, size);
 
-  //  Process data read if successful.
-  debugSerial.println(debugOutput); debugOutput = "";
-  if (result == node.ku8MBSuccess)
-  {
-    debugSerial.println("Read OK");
-    for (uint16_t j = 0; j < size; j++)
-      data[j] = node.getResponseBuffer(j);
+//  Cache registers in pages of 24 bytes.  Reading more than 24 bytes may be inaccurate.
+const uint16_t max_register_page_size = 24;  //  Read registers in pages of 24 bytes.
+uint8_t register_page_data[max_register_page_size];  //  Read registers one page at a time.
+uint16_t register_page_address = 0xffff;  //  Address of last page read.
+uint16_t register_page_size = 0;  //  Size of last page read, in bytes.
+
+uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
+  //  Read Modbus holding registers from specified address and size (in words)
+  //  to data buffer.
+  debugOutput.concat("Getting "); debugOutput.concat(size);
+  debugOutput.concat(" words at "); debugOutput.concat(address); debugOutput.concat("\r\n");
+  if (address != 0xffff && address >= register_page_address &&
+      address + size <= register_page_address + register_page_size) {
+    //  If exists in the register page, reuse it.
+    debugOutput.concat("Return cache for "); debugOutput.concat(address);
+    debugOutput.concat(" size "); debugOutput.concat(size);
+    debugOutput.concat(" words\r\n");
+  } else {
+    //  Else read in the page.
+    debugOutput.concat("Reading "); debugOutput.concat(register_page_size);
+    debugOutput.concat(" words at "); debugOutput.concat(address); debugOutput.concat("\r\n");
+    uint8_t result = node.readHoldingRegisters(address, register_page_size);
+    debugSerial.println(debugOutput); debugOutput = "";
+    if (result != node.ku8MBSuccess) {
+      //  Return the error.
+      debugSerial.print("Read failed: 0x");
+      debugSerial.println(result, HEX);
+      return result;
+    }
+    //  Sample response:
+    //    05 03 08 00 00 5d b8 00 00 00 00 2d b1
+    //    Slave ID
+    //       Functon code
+    //          Result size in bytes
+    //             Result                  CRC
+    register_page_address = address;
+    register_page_size = node.getResponseBuffer(2);
+    debugSerial.print("Received "); debugSerial.print(register_page_size);
+    debugSerial.println(" bytes");
+    for (uint16_t j = 0; j < register_page_size; j++)
+      register_page_data[j] = node.getResponseBuffer(j + 3);
   }
-  else
-  {
-    debugSerial.print("Read failed: 0x");
-    debugSerial.println(result, HEX);
-  }
-  return result;
+  //  Copy from our buffer to caller's buffer.
+  uint16_t size2 = size;
+  if (size > register_page_address + register_page_size - address)
+    size2 = register_page_address + register_page_size - address;
+  for (uint16_t j = 0; j < size2; j++)
+    data[j] = register_page_data[address - register_page_address + j];
+  return node.ku8MBSuccess;
+}
+
+uint8_t readHoldingRegister(Register reg, uint16_t data[]) {
+  //  Read Modbus holding register to data buffer.
+  return readHoldingRegisters(reg.address, reg.size, data);
+}
+
+void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
+  //  Decode Modbus holding register from data buffer and concat to msg
+  //  if it should be transmitted to SIGFOX.
+  String displayValue = "", transmitValue = "";
+  parseType(reg, data, displayValue, transmitValue);
+  debugSerial.print(reg.name); debugSerial.print(" = ");
+  debugSerial.print(displayValue); debugSerial.print(reg.unit);
+  debugSerial.println("");
+  if (reg.transmit && (msg + transmitValue).length() <= 24)
+    msg = msg + transmitValue;  //  Send to SIGFOX if we should transmit.
 }
 #endif
 
 //  End Sensor Declaration
-////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////
-//  Begin SIGFOX Module Declaration
-
-// TD1208 Sigfox module IO definition
-#define TX 5  //  For UnaBiz / Akene
-#define RX 4  //  For UnaBiz / Akene
-
-// Sigfox instance management 
-Akeru akeru(RX, TX);
-
-//  End SIGFOX Module Declaration
 ////////////////////////////////////////////////////////////
 
 void setup()
@@ -156,7 +186,7 @@ void setup()
   //  Begin Sensor Setup
 
   //  Init the transmission enable pin for the RS485 shield.
-  pinMode(EN, OUTPUT);
+  pinMode(rs485_transmit, OUTPUT);
   //  Use Serial (port 0); initialize Modbus communication baud rate
   Serial.begin(9600);
   //  Communicate with Modbus slave over Serial (port 0).
@@ -173,12 +203,10 @@ void setup()
   //  Begin SIGFOX Module Setup
 
   // Check SIGFOX Module.
-  if (!akeru.begin())
-  {
+  if (!akeru.begin()) {
     debugSerial.println("****TD1208 KO");
     ////while(1);
   }
-
   //  Must not show any debug output because it will interfere with RS485.
   //akeru.echoOn(); //  Comment this line to hide debug output.
 
@@ -200,34 +228,24 @@ void loop()
   return forwardLoop();
 
 #else  //  FORWARD_MODE
-  //  Prepare sensor data.  Must not exceed 12 characters.
+  //  Prepare SIGFOX message based on Modbus registers.  Must not exceed 12 characters.
   //  Based on https://github.com/4-20ma/ModbusMaster
   //  and https://www.cooking-hacks.com/documentation/tutorials/modbus-module-shield-tutorial-for-arduino-raspberry-pi-intel-galileo/  static uint32_t i;
-  String msg = "";
   static uint32_t loop_count = 0;
-  uint8_t result;
-  uint16_t data_size = 4 * (loop_count + 1);
-  uint16_t data[data_size];
+  static uint16_t data[max_register_size];
 
-  //  Read Modbus parameter to RX buffer.
+  //  Read all registers and send selected registers to SIGFOX.
+  String msg = "";
   debugOutput.concat("[ "); debugOutput.concat(loop_count++); debugOutput.concat(" ] ");
-  result = readHoldingRegisters(simple_voltage_v1.address, data_size, data);
-  if (result == node.ku8MBSuccess)
-  {
-    //  Send data to SIGFOX.
-    msg.concat(akeru.toHex(data[0]));
-    debugSerial.print("simple_voltage_v1="); debugSerial.println(data[0]);
+  for (uint16_t r = 0; r < all_registers_count; r++) {
+    //  Read Modbus registers to data buffer.
+    const Register reg = all_registers[r];
+    const uint8_t result = readHoldingRegister(reg, data);
+    if (result == node.ku8MBSuccess)
+      concatHoldingRegister(msg, reg, data);  //  Send data to SIGFOX.
+    else if (reg.transmit)
+      msg = msg + akeru.toHex(result);  //  Send error byte to SIGFOX.
   }
-  else msg = msg + akeru.toHex(result);  //  Send error byte to SIGFOX.
-
-  result = readHoldingRegisters(frequency_f.address, frequency_f.size, data);
-  if (result == node.ku8MBSuccess)
-  {
-    //  Send data to SIGFOX.
-    msg.concat(akeru.toHex(data[0]));
-    debugSerial.print("frequency_f="); debugSerial.println(data[0]);
-  }
-  else msg = msg + akeru.toHex(result);  //  Send error byte to SIGFOX.
 #endif  //  FORWARD_MODE
 
   //  End Sensor Loop
@@ -237,12 +255,9 @@ void loop()
   //  Begin SIGFOX Module Loop
 
   //  Send sensor data.
-  if (akeru.sendString(msg))
-  {
+  if (akeru.sendString(msg)) {
     debugSerial.println("Message sent");
-  }
-  else
-  {
+  } else {
     debugSerial.println("Message not sent");
   }
 
@@ -375,24 +390,28 @@ ModbusMaster invalid response CRC exception.
 The CRC in the response does not match the one calculated.
  */
 
-// set word 0 of TX buffer to least-significant word of counter (bits 15..0)
-//node.setTransmitBuffer(0, lowWord(i));
-// set word 1 of TX buffer to most-significant word of counter (bits 31..16)
-//node.setTransmitBuffer(1, highWord(i));
-// slave: write TX buffer to (2) 16-bit registers starting at register 0
-//result = node.writeMultipleRegisters(0, 2);
-
 /*
 Expected output:
-2016/10/22 16:13:44  >>> 05 03 27 0F 00 02 FF 38
 
-Actual:
-[ 1 ] Reading 2 bytes at 9999
-Set EN=high before transmit
-Send: 05 03 27 0f 00 02 ff 38
+Demo sketch for Akeru library :)
+Communicating to Modbus Slave #5
+****TD1208 KO
 Set EN=low and delay before receive
-Receive: 05 83 02 81 30
-Read failed: 0x2
+[ 0 ] Reading 4 words at 50520
+Set EN=high before transmit
+Send: 05 03 c5 58 00 04 f8 92
+Set EN=low and delay before receive
+Receive: 05 03 08 00 00 5d b8 00 00 00 00 2d b1
+Read OK
+simple_voltage_v1=0
+Reading 2 words at 50526
+Set EN=high before transmit
+Send: 05 03 c5 5e 00 02 98 91
+Set EN=low and delay before receive
+Receive: 05 03 04 00 00 13 85 73 60
+Read OK
+frequency_f=0
+Message not sent
 
 */
 
