@@ -36,6 +36,7 @@ SoftwareSerial debugSerial(6, 7); // RX, TX
 //  See diris-a20.html, diris-a20.png, diris-a20.pdf.
 
 const int slaveID = 5;  //  Default Slave ID of the Modbus device.
+const uint16_t table_offset = 40001;  //  Subtract this from all register addresses.
 const uint16_t measurement_common_table_start = 50000;  //  In 16-bit words.
 ////const uint16_t measurement_common_table_start = 768;  //  In 16-bit words.
 
@@ -171,10 +172,11 @@ void loop()
   loop_count++;
 
   //  Read Measurement Common table to RX buffer.
+  const uint16_t table_start = measurement_common_table_start - table_offset;
   debugOutput.concat("[ "); debugOutput.concat(loop_count); debugOutput.concat(" ] ");
   debugOutput.concat("Reading "); debugOutput.concat(measurement_common_table_size);
-  debugOutput.concat(" bytes at "); debugOutput.concat(measurement_common_table_start); debugOutput.concat("\r\n");
-  result = node.readHoldingRegisters(measurement_common_table_start, measurement_common_table_size);
+  debugOutput.concat(" bytes at "); debugOutput.concat(table_start); debugOutput.concat("\r\n");
+  result = node.readHoldingRegisters(table_start, measurement_common_table_size);
 
   //  Do something with data if read is successful.
   debugSerial.println(debugOutput); debugOutput = "";
@@ -358,8 +360,10 @@ The CRC in the response does not match the one calculated.
 
 /*
 Expected output:
-
 2016/10/22 16:13:44  >>> 05 03 27 0F 00 02 FF 38
+
+Actual:
+Send: 05 03 27 0f 00 02 ff 38
 
 */
 
