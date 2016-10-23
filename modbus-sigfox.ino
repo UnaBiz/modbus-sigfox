@@ -120,6 +120,7 @@ void parseType(Register reg, uint16_t data[], String &displayValue, String &tran
   //  Parse register types for display and for sending to SIGFOX.
   displayValue = ""; transmitValue = "";
   if (false) {}
+  #if NOTUSED
   else if (reg.type == TYPE_DATETIME_3) {
     for (uint16_t i = 0; i < 3; i++) {
       uint16_t value = data[i];
@@ -128,6 +129,7 @@ void parseType(Register reg, uint16_t data[], String &displayValue, String &tran
       transmitValue.concat(akeru.toHex(value));
     }
   }
+  #endif
   else if (reg.type == TYPE_S16) {
     int16_t result = data[0];
     displayValue.concat(result);
@@ -295,11 +297,14 @@ uint8_t readHoldingRegister(Register reg, uint16_t data[]) {
 void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
   //  Decode Modbus holding register from data buffer and concat to msg
   //  if it should be transmitted to SIGFOX.
+  //  Get name and unit from flash memory.
+  String name = getNameByIndex(reg.name_index);
+  String unit = getUnitByIndex(reg.unit_index);
   String displayValue = "", transmitValue = "";
   parseType(reg, data, displayValue, transmitValue);
   debugSerial.print(String("[ ") + reg.address + " ] ");
-  debugSerial.print(reg.name); debugSerial.print(F(" =\r\n  "));
-  debugSerial.print(displayValue + " "); debugSerial.print(reg.unit);
+  debugSerial.print(name); debugSerial.print(F(" =\r\n  "));
+  debugSerial.print(displayValue + " " + unit);
   debugSerial.println(F(""));
   if (reg.transmit && (msg + transmitValue).length() <= 24)
     msg = msg + transmitValue;  //  Send to SIGFOX if we should transmit.
@@ -311,8 +316,6 @@ void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
 
 void setup()
 {
-  testRegisters(); ////
-
   ////////////////////////////////////////////////////////////
   //  Begin General Setup
   
@@ -351,9 +354,10 @@ void setup()
   for (int i = 0; i < 5; i++) {
     //  Retry because module may be powering up.
     if (akeru.begin()) break;
-    if (i == 5) debugSerial.println(F("****TD1208 KO"));
+    if (i == 5) debugSerial.println(F("****SIGFOX Module KO"));
     delay(1000);
   }
+  debugSerial.println(F("SIGFOX Module OK"));
   //  Must not show any debug output because it will interfere with RS485.
   //akeru.echoOn(); //  Comment this line to hide debug output.
 
@@ -385,9 +389,12 @@ void loop()
   clearRegisterCache();  //  Don't reuse the past register data.
   String msg = "";
   debugPrint("[ "); debugPrint(String(loop_count++).c_str()); debugPrint(" ] ");
-  for (uint16_t r = 0; r < all_registers_count; r++) {
+  for (uint16_t r = 0; r < all_registers.rows(); r++) {
     //  Read Modbus registers to data buffer.
-    const Register reg = OLD_all_registers[r];
+    Register reg = {
+        (boolean) all_registers[r][0], all_registers[r][1], all_registers[r][2],
+        all_registers[r][3], all_registers[r][4], all_registers[r][5],
+    };
     const uint8_t result = readHoldingRegister(reg, data);
     if (result == node.ku8MBSuccess)
       concatHoldingRegister(msg, reg, data);  //  Send data to SIGFOX.
