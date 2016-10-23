@@ -28,10 +28,7 @@ Arduino library for communicating with Modbus slaves over RS232/485 (via RTU pro
 
 /* _____PROJECT INCLUDES_____________________________________________________ */
 #include "ModbusMaster.h"
-////
-#include <SoftwareSerial.h>
-extern String debugOutput;
-////
+extern void debugPrint(const char *s);  ////
 
 /* _____GLOBAL VARIABLES_____________________________________________________ */
 
@@ -585,18 +582,21 @@ uint8_t ModbusMaster::readWriteMultipleRegisters(uint16_t u16ReadAddress,
   return ModbusMasterTransaction(ku8MBReadWriteMultipleRegisters);
 }
 
-String toHex(byte c)
-{
-  byte *b = (byte*) & c;
+////
+char hexBuffer[3];
+const char hexDigits[] = "0123456789abcdef";
 
-  String bytes = "";
-  if (b[0] <= 0xF) // single char
-  {
-    bytes.concat("0"); // add a "0" to make sure every byte is read correctly
+char *byteToHex(uint8_t b)
+{
+  for (int i = 1; i >= 0; i--) {
+    uint8_t n = b % 16;
+    hexBuffer[i] = hexDigits[n];
+    b = b / 16;
   }
-  bytes.concat(String(b[0], 16));
-  return bytes;
+  hexBuffer[2] = 0;
+  return hexBuffer;
 }
+////
 
 /* _____PRIVATE FUNCTIONS____________________________________________________ */
 /**
@@ -724,14 +724,14 @@ uint8_t ModbusMaster::ModbusMasterTransaction(uint8_t u8MBFunction)
   {
     _preTransmission();
   }
-  debugOutput.concat("Send:"); ////
+  debugPrint("ModbusMaster Send:"); ////
   for (i = 0; i < u8ModbusADUSize; i++)
   {
     _serial->write(u8ModbusADU[i]);
-    debugOutput.concat(" ");  ////
-    debugOutput.concat(toHex(u8ModbusADU[i]));  ////
+    debugPrint(" ");  ////
+    debugPrint(byteToHex(u8ModbusADU[i]));  ////
   }
-  debugOutput.concat("\r\n");  ////
+  debugPrint("\r\n");  ////
 
   u8ModbusADUSize = 0;
   _serial->flush();    // flush transmit buffer
@@ -741,7 +741,7 @@ uint8_t ModbusMaster::ModbusMasterTransaction(uint8_t u8MBFunction)
   }
   
   // loop until we run out of time or bytes, or an error occurs
-  debugOutput.concat("Receive:"); ////
+  debugPrint("ModbusMaster Receive:"); ////
   u32StartTime = millis();
   while (u8BytesLeft && !u8MBStatus)
   {
@@ -750,11 +750,11 @@ uint8_t ModbusMaster::ModbusMasterTransaction(uint8_t u8MBFunction)
 #if __MODBUSMASTER_DEBUG__
       digitalWrite(__MODBUSMASTER_DEBUG_PIN_A__, true);
 #endif
-      byte b = _serial->read();
-      u8ModbusADU[u8ModbusADUSize++] = b;
+      uint8_t b = (uint8_t) _serial->read(); ////
+      u8ModbusADU[u8ModbusADUSize++] = b; ////
       u8BytesLeft--;
-      debugOutput.concat(" ");  ////
-      debugOutput.concat(toHex(b));  ////
+      debugPrint(" ");  ////
+      debugPrint(byteToHex(b));  ////
 #if __MODBUSMASTER_DEBUG__
       digitalWrite(__MODBUSMASTER_DEBUG_PIN_A__, false);
 #endif

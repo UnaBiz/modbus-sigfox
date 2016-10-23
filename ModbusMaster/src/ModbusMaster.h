@@ -42,9 +42,12 @@ Set to 1 to enable debugging features within class:
   - PIN A cycles for each byte read in the Modbus response
   - PIN B cycles for each millisecond timeout during the Modbus response
 */
-#define __MODBUSMASTER_DEBUG__ (0)
-#define __MODBUSMASTER_DEBUG_PIN_A__ 4
-#define __MODBUSMASTER_DEBUG_PIN_B__ 5
+////#define __MODBUSMASTER_DEBUG__ (0)
+////#define __MODBUSMASTER_DEBUG_PIN_A__ 4
+////#define __MODBUSMASTER_DEBUG_PIN_B__ 5
+#define __MODBUSMASTER_DEBUG__ (1)
+#define __MODBUSMASTER_DEBUG_PIN_A__ LED_BUILTIN
+#define __MODBUSMASTER_DEBUG_PIN_B__ LED_BUILTIN
 
 /* _____STANDARD INCLUDES____________________________________________________ */
 // include types & constants of Wiring core API

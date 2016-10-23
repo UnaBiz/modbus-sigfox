@@ -19,9 +19,9 @@
 //  FTDI RX -> Arduino D7
 //  FTDI GND -> Arduino GND
 
-#include <avr/pgmspace.h>
-#include <String.h>
+#include <Arduino.h>
 #include <SoftwareSerial.h>
+#include "Flash/src/Flash.h"
 #include "unabiz-arduino-master/Akeru.h"
 #include "ModbusMaster/src/ModbusMaster.h"
 #include "modbus-types.h"
@@ -66,20 +66,40 @@ SoftwareSerial debugSerial(6, 7); // RX, TX
 //  List of registers to be read and transmitted optionally.
 const uint16_t all_registers_count = sizeof(all_registers) / sizeof(Register);
 
-//  Use D2 port as flow control for RS485 shield.
+//  Use D2 port as send/receive control for RS485 shield.
 //  Set to high for the sending state, set to low for receiving state
 const int rs485_transmit = 2;
 const int slaveID = 5;  //  Default Slave ID of the Modbus device.
 ModbusMaster node;  //  Instantiate ModbusMaster object
-String debugOutput = "";  //  Debug output buffer.
+char debugOutput[128];  //  For debug output by ModusMaster.
+size_t debugOutputSize = sizeof(debugOutput);
+
+void debugPrint(const char *s) {
+  //  Print to debug output.
+  strlcat(debugOutput, s, debugOutputSize);
+}
+
+void debugPrint(uint16_t u) {
+  //  Print to debug output.
+  strlcat(debugOutput, String(u).c_str(), debugOutputSize);
+}
+
+void debugPrint(const __FlashStringHelper *s) {
+  //  Print string to debug output.
+  strlcat(debugOutput, String(s).c_str(), debugOutputSize);
+}
 
 void preTransmission() {
-  debugOutput.concat(F("Set rs485_transmit=high before transmit\r\n"));
+  //  This will be called by ModbusMaster just before transmit.
+  //  We set the transmit pin to high so that the RS485 shield will transmit.
+  debugPrint(F("Set rs485_transmit=high before transmit\r\n"));
   digitalWrite(rs485_transmit, HIGH);    //  Set to high: RS485 shield waiting to transmit data
 }
 
 void postTransmission() {
-  debugOutput.concat(F("Set rs485_transmit=low and delay before receive\r\n"));
+  //  This will be called by ModbusMaster just after transmit.
+  //  We set the transmit pin to low so that the RS485 shield will receive.
+  debugPrint(F("Set rs485_transmit=low and delay before receive\r\n"));
   delayMicroseconds(660);  //  Need to wait for last char to be sent. See http://www.gammon.com.au/forum/?id=11428
   digitalWrite(rs485_transmit, LOW);    //  Set to low: RS485 shield waiting to receive data
 }
@@ -102,55 +122,72 @@ uint8_t register_page_data[max_register_page_size];  //  Read registers one page
 uint16_t register_page_address = 0xffff;  //  Address of last page read.
 uint16_t register_page_size = 0;  //  Size of last page read, in bytes.
 
+void clearRegisterCache() {
+  //  Erase the register cache.
+  register_page_address = 0xffff;
+  register_page_size = 0;
+}
+
 uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
   //  Read Modbus holding registers from specified address and size (in words)
   //  to data buffer.
-  debugOutput.concat("Getting "); debugOutput.concat(size);
-  debugOutput.concat(" words at "); debugOutput.concat(address); debugOutput.concat("\r\n");
+  debugPrint(F("readHoldingRegisters: Getting ")); debugPrint(size);
+  debugPrint(F(" words at ")); debugPrint(address); debugPrint(F("\r\n"));
   if (address != 0xffff && address >= register_page_address &&
       address + size <= register_page_address + register_page_size) {
     //  If exists in the register page, reuse it.
-    debugOutput.concat("Return cache for "); debugOutput.concat(address);
-    debugOutput.concat(" size "); debugOutput.concat(size);
-    debugOutput.concat(" words\r\n");
+    debugPrint(F("readHoldingRegisters: Return cache for ")); debugPrint(address);
+    debugPrint(F(" size ")); debugPrint(size);
+    debugPrint(F(" words\r\n"));
+    debugSerial.println(debugOutput); debugOutput[0] = 0;
   } else {
-    //  Else read in the page.
-    debugOutput.concat("Reading "); debugOutput.concat(max_register_page_size);
-    debugOutput.concat(" words at "); debugOutput.concat(address); debugOutput.concat("\r\n");
-    node.clearResponseBuffer();
-    uint8_t result = node.readHoldingRegisters(address, max_register_page_size);
-
-    debugSerial.println(debugOutput); debugOutput = "";
-    if (result != node.ku8MBSuccess) {
-      //  Return the error.
-      debugSerial.print("Read failed: 0x");
-      debugSerial.println(result, HEX);
-      return result;
-    }
-    //  Sample response:
+    //  Else read in the page from RS485, which looks like:
     //    05 03 08 00 00 5d b8 00 00 00 00 2d b1
     //    Slave ID
     //       Function code
     //          Result size in bytes
     //             Result                  CRC
     //  The code below only sees the Result words.
+    debugPrint(F("Reading ")); debugPrint(max_register_page_size);
+    debugPrint(F(" words at ")); debugPrint(address); debugPrint(F("\r\n"));
+    node.clearResponseBuffer();
+    uint8_t result = node.readHoldingRegisters(address, max_register_page_size);
+
+    debugSerial.println(debugOutput); debugOutput[0] = 0;
+    if (result != node.ku8MBSuccess) {
+      //  Return the error.
+      debugSerial.print(F("Read failed: 0x"));
+      debugSerial.println(result, HEX);
+      return result;
+    }
     register_page_address = address;
     register_page_size = 0;
+    String debugData = "";
     //  Read the entire page.
     for (;;) {
       if (register_page_size >= max_register_page_size) break;
       if (!node.available()) break;
-      register_page_data[register_page_size++] = node.receive();
+      uint16_t w = node.receive();
+      register_page_data[register_page_size++] = w;
+      if (debugData != "") debugData.concat(" ");
+      debugData.concat(akeru.toHex(w));
     }
-    debugSerial.print("Received "); debugSerial.print(register_page_size);
-    debugSerial.println(" bytes");
+    debugSerial.print(F("readHoldingRegisters: Received ")); debugSerial.print(register_page_size);
+    debugSerial.println(F(" words:")); debugSerial.println(debugData);
   }
   //  Copy from our buffer to caller's buffer.
   uint16_t size2 = size;
   if (size > register_page_address + register_page_size - address)
     size2 = register_page_address + register_page_size - address;
-  for (uint16_t j = 0; j < size2; j++)
-    data[j] = register_page_data[address - register_page_address + j];
+  String debugData = "";
+  for (uint16_t j = 0; j < size2; j++) {
+    uint16_t w = register_page_data[address - register_page_address + j];
+    data[j] = w;
+    if (debugData != "") debugData.concat(" ");
+    debugData.concat(akeru.toHex(w));
+  }
+  debugSerial.print(F("readHoldingRegisters: Returned ")); debugSerial.print(size2);
+  debugSerial.println(F(" words:")); debugSerial.println(debugData);
   return node.ku8MBSuccess;
 }
 
@@ -181,8 +218,9 @@ void setup()
   //  Begin General Setup
   
   //  Initialize serial communication at 9600 bits per second:
+  debugOutput[0] = 0;
   debugSerial.begin(9600);
-  debugSerial.println(F("Started modbus-sigfox"));
+  debugSerial.println("Started modbus-sigfox");
 #ifdef FORWARD_MODE
   forwardSerial.begin(9600);
 #endif  //  FORWARD_MODE
@@ -243,8 +281,9 @@ void loop()
   static uint16_t data[max_register_size];
 
   //  Read all registers and send selected registers to SIGFOX.
+  clearRegisterCache();  //  Don't reuse the past register data.
   String msg = "";
-  debugOutput.concat("[ "); debugOutput.concat(loop_count++); debugOutput.concat(" ] ");
+  debugPrint("[ "); debugPrint(String(loop_count++).c_str()); debugPrint(" ] ");
   for (uint16_t r = 0; r < all_registers_count; r++) {
     //  Read Modbus registers to data buffer.
     const Register reg = all_registers[r];
@@ -387,25 +426,22 @@ The CRC in the response does not match the one calculated.
 /*
 Expected output:
 
-Demo sketch for Akeru library :)
+Started modbus-sigfox
 Communicating to Modbus Slave #5
-****TD1208 KO
-Set EN=low and delay before receive
-[ 0 ] Reading 4 words at 50520
-Set EN=high before transmit
-Send: 05 03 c5 58 00 04 f8 92
-Set EN=low and delay before receive
-Receive: 05 03 08 00 00 5d b8 00 00 00 00 2d b1
-Read OK
-simple_voltage_v1=0
-Reading 2 words at 50526
-Set EN=high before transmit
-Send: 05 03 c5 5e 00 02 98 91
-Set EN=low and delay before receive
-Receive: 05 03 04 00 00 13 85 73 60
-Read OK
-frequency_f=0
-Message not sent
+Set rs485_transmit=low and delay before receive
+[ 0 ] Getting 2 words at 50520
+Reading 24 words at 50520
+Set rs485_transmit=high before transmit
+Send: 05 03 c5 58 00 18 f9 5b
+Receive: 05 03 30 00 00 5e eb 00 00 00
+Received 23 bytes
+simple_voltage_v1 = 235V / 100
+frequency_f = 138Hz / 100
+Message sent
+simple_voltage_v1 = 235V / 100
+frequency_f = 138Hz / 100
+Message sent
+simple_voltage
 
 */
 

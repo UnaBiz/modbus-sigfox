@@ -1808,6 +1808,7 @@ function(SETUP_ARDUINO_SKETCH TARGET_NAME SKETCH_PATH OUTPUT_VAR)
         file(GLOB SKETCH_SOURCES
                 ${SKETCH_PATH}/ModbusMaster/src/*.cpp #### Allow code analysis.
                 ${SKETCH_PATH}/unabiz-arduino-master/*.cpp #### Allow code analysis.
+                ${SKETCH_PATH}/Flash/src/*.cpp #### Allow code analysis.
                 ${SKETCH_PATH}/*.pde
                 ${SKETCH_PATH}/*.ino) ####
         set(ALL_SRCS ${SKETCH_SOURCES})
