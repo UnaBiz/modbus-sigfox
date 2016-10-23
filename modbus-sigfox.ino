@@ -388,7 +388,7 @@ void loop()
   //  Read all registers and send selected registers to SIGFOX.
   clearRegisterCache();  //  Don't reuse the past register data.
   String msg = "";
-  debugPrint("[ "); debugPrint(String(loop_count++).c_str()); debugPrint(" ] ");
+  debugPrint("------ Loop "); debugPrint(String(loop_count++).c_str()); debugPrint("\r\n");
   for (uint16_t r = 0; r < all_registers.rows(); r++) {
     //  Read Modbus registers to data buffer.
     Register reg = {
@@ -534,54 +534,442 @@ The CRC in the response does not match the one calculated.
 /*
 Expected output:
 
-Started modbus-sigfox
+tarted modbus-sigfox
 Communicating to Modbus Slave #5
+SIGFOX Module OK
 Set rs485_transmit=low and delay before receive
 [ 0 ] readHoldingRegisters: Getting 2 words at 50520
 Reading 12 words at 5052
 readHoldingRegisters: Received 11 words:
-0000 155f 0000 0000 0000 0000 0000 8913 0000 0000 0000
+0000 6f60 0000 0000 0000 0000 0000 8a13 0000 0000 0000
 readHoldingRegisters: Returned 2 words:
-0000 155f
-simple_voltage_v1 = 24341V / 100
+0000 6f60
+[ 50520 ] Simple voltage : V1 =
+  24687 V / 100
+readHoldingRegisters: Getting 2 words at 50512
+Reading 12 words at 50512
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 d106 0000 0000 0000 0000 0000 0000 0000 6f60 0000
+readHoldingRegisters: Returned 2 words:
+0000 d106
+[ 50512 ] Hour Meter =
+  1745 h / 100
+readHoldingRegisters: Getting 2 words at 50514
+readHoldingRegisters: Return cache for 50514 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50514 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50516
+readHoldingRegisters: Return cache for 50516 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50516 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50518
+readHoldingRegisters: Return cache for 50518 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50518 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50522
+Reading 12 words at 50522
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 0000 0000 0000 0000 8a13 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50522 ] Simple voltage : V2 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50524
+readHoldingRegisters: Return cache for 50524 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50524 ] Simple voltage : V3 =
+  0 V / 100
 readHoldingRegisters: Getting 2 words at 50526
 readHoldingRegisters: Return cache for 50526 size 2 words
 
 readHoldingRegisters: Returned 2 words:
-0000 8913
-frequency_f = 5001Hz / 100
+0000 8a13
+[ 50526 ] Frequency : F =
+  5002 Hz / 100
+readHoldingRegisters: Getting 2 words at 50528
+readHoldingRegisters: Return cache for 50528 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50528 ] Current : I1 =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50530
+readHoldingRegisters: Return cache for 50530 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50530 ] Current : I2 =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50532
+Reading 12 words at 50532
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50532 ] Current : I3 =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50534
+readHoldingRegisters: Return cache for 50534 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50534 ] Neutral Current : In =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50536
+readHoldingRegisters: Return cache for 50536 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50536 ] Active Power +/- : P =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50538
+readHoldingRegisters: Return cache for 50538 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50538 ] Reactive Power +/- : Q =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50540
+readHoldingRegisters: Return cache for 50540 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50540 ] Apparent Power : S =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50542
+Reading 12 words at 50542
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 e803 0000 0000 0000 0000 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50542 ] Power Factor : -: leading et + : laggin =
+  1000 - / 1000
+readHoldingRegisters: Getting 2 words at 50544
+readHoldingRegisters: Return cache for 50544 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50544 ] Active Power phase 1 +/- : P1 =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50546
+readHoldingRegisters: Return cache for 50546 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50546 ] Active Power phase 2 +/- : P2 =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50548
+readHoldingRegisters: Return cache for 50548 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50548 ] Active Power phase 3 +/- : P3 =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50550
+readHoldingRegisters: Return cache for 50550 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50550 ] Reactive Power phase 1 +/- : Q1 =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50552
+Reading 12 words at 50552
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50552 ] Reactive Power phase 2 +/- : Q2 =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50554
+readHoldingRegisters: Return cache for 50554 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50554 ] Reactive Power phase 3 +/- : Q3 =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50556
+readHoldingRegisters: Return cache for 50556 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50556 ] Apparent Power phase 1 : S1 =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50558
+readHoldingRegisters: Return cache for 50558 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50558 ] Apparent Power phase 2 : S2 =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50560
+readHoldingRegisters: Return cache for 50560 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50560 ] Apparent Power phase 3 : S3 =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50562
+Reading 12 words at 50562
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 e803 0000 e803 0000 e803 ffff ffff ffff ffff ffff
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50562 ] Power Factor phase 1 -: leading and + : =
+  1000 - / 1000
+readHoldingRegisters: Getting 2 words at 50564
+readHoldingRegisters: Return cache for 50564 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50564 ] Power Factor phase 2 -: leading and + : =
+  1000 - / 1000
+readHoldingRegisters: Getting 2 words at 50566
+readHoldingRegisters: Return cache for 50566 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50566 ] Power Factor phase 3 -: leading and + : =
+  1000 - / 1000
 Message sent
 [ 1 ] readHoldingRegisters: Getting 2 words at 50520
 Reading 12 words at 50520
 Set rs485_transmit=high before transmit
 Modbu
 readHoldingRegisters: Received 11 words:
-0000 1c5f 0000 0000 0000 0000 0000 8913 0000 0000 0000
+0000 7960 0000 0000 0000 0000 0000 8b13 0000 0000 0000
 readHoldingRegisters: Returned 2 words:
-0000 1c5f
-simple_voltage_v1 = 24348V / 100
-readHoldingRegisters: Getting 2 words at 50526
-readHoldingRegisters: Return cache for 50526 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 8913
-frequency_f = 5001Hz / 100
-Message sent
-[ 2 ] readHoldingRegisters: Getting 2 words at 50520
-Reading 12 words at 50520
+0000 7960
+[ 50520 ] Simple voltage : V1 =
+  24697 V / 100
+readHoldingRegisters: Getting 2 words at 50512
+Reading 12 words at 50512
 Set rs485_transmit=high before transmit
-Modbu
+ModbusMaste
 readHoldingRegisters: Received 11 words:
-0000 145f 0000 0000 0000 0000 0000 8a13 0000 0000 0000
+0000 d206 0000 0000 0000 0000 0000 0000 0000 7960 0000
 readHoldingRegisters: Returned 2 words:
-0000 145f
-simple_voltage_v1 = 24340V / 100
+0000 d206
+[ 50512 ] Hour Meter =
+  1746 h / 100
+readHoldingRegisters: Getting 2 words at 50514
+readHoldingRegisters: Return cache for 50514 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50514 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50516
+readHoldingRegisters: Return cache for 50516 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50516 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50518
+readHoldingRegisters: Return cache for 50518 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50518 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50522
+Reading 12 words at 50522
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 0000 0000 0000 0000 8b13 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50522 ] Simple voltage : V2 =
+  0 V / 100
+readHoldingRegisters: Getting 2 words at 50524
+readHoldingRegisters: Return cache for 50524 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50524 ] Simple voltage : V3 =
+  0 V / 100
 readHoldingRegisters: Getting 2 words at 50526
 readHoldingRegisters: Return cache for 50526 size 2 words
 
 readHoldingRegisters: Returned 2 words:
-0000 8a13
-frequency_f = 5002Hz / 100
-Message sent
+0000 8b13
+[ 50526 ] Frequency : F =
+  5003 Hz / 100
+readHoldingRegisters: Getting 2 words at 50528
+readHoldingRegisters: Return cache for 50528 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50528 ] Current : I1 =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50530
+readHoldingRegisters: Return cache for 50530 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50530 ] Current : I2 =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50532
+Reading 12 words at 50532
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50532 ] Current : I3 =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50534
+readHoldingRegisters: Return cache for 50534 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50534 ] Neutral Current : In =
+  0 A / 1000
+readHoldingRegisters: Getting 2 words at 50536
+readHoldingRegisters: Return cache for 50536 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50536 ] Active Power +/- : P =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50538
+readHoldingRegisters: Return cache for 50538 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50538 ] Reactive Power +/- : Q =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50540
+readHoldingRegisters: Return cache for 50540 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50540 ] Apparent Power : S =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50542
+Reading 12 words at 50542
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 e803 0000 0000 0000 0000 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50542 ] Power Factor : -: leading et + : laggin =
+  1000 - / 1000
+readHoldingRegisters: Getting 2 words at 50544
+readHoldingRegisters: Return cache for 50544 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50544 ] Active Power phase 1 +/- : P1 =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50546
+readHoldingRegisters: Return cache for 50546 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50546 ] Active Power phase 2 +/- : P2 =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50548
+readHoldingRegisters: Return cache for 50548 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50548 ] Active Power phase 3 +/- : P3 =
+  0 W / 0.1
+readHoldingRegisters: Getting 2 words at 50550
+readHoldingRegisters: Return cache for 50550 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50550 ] Reactive Power phase 1 +/- : Q1 =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50552
+Reading 12 words at 50552
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50552 ] Reactive Power phase 2 +/- : Q2 =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50554
+readHoldingRegisters: Return cache for 50554 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50554 ] Reactive Power phase 3 +/- : Q3 =
+  0 var / 0.1
+readHoldingRegisters: Getting 2 words at 50556
+readHoldingRegisters: Return cache for 50556 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50556 ] Apparent Power phase 1 : S1 =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50558
+readHoldingRegisters: Return cache for 50558 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50558 ] Apparent Power phase 2 : S2 =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50560
+readHoldingRegisters: Return cache for 50560 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 0000
+[ 50560 ] Apparent Power phase 3 : S3 =
+  0 VA / 0.1
+readHoldingRegisters: Getting 2 words at 50562
+Reading 12 words at 50562
+Set rs485_transmit=high before transmit
+ModbusMaste
+readHoldingRegisters: Received 11 words:
+0000 e803 0000 e803 0000 e803 ffff ffff ffff ffff ffff
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50562 ] Power Factor phase 1 -: leading and + : =
+  1000 - / 1000
+readHoldingRegisters: Getting 2 words at 50564
+readHoldingRegisters: Return cache for 50564 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50564 ] Power Factor phase 2 -: leading and + : =
+  1000 - / 1000
+readHoldingRegisters: Getting 2 words at 50566
+readHoldingRegisters: Return cache for 50566 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 e803
+[ 50566 ] Power Factor phase 3 -: leading and + : =
+  1000 - / 1000
 */
 

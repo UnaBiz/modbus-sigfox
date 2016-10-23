@@ -15,10 +15,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="87fe155f-2624-46c5-b610-3d695e5f9d87" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modbus-sigfox.ino" afterPath="$PROJECT_DIR$/modbus-sigfox.ino" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modbus-types.h" afterPath="$PROJECT_DIR$/modbus-types.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/register.h" afterPath="$PROJECT_DIR$/register.h" />
     </list>
     <ignored path="modbus-sigfox.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -41,8 +38,8 @@
       <file leaf-file-name="modbus-sigfox.ino" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2161">
-              <caret line="307" column="29" selection-start-line="307" selection-start-column="29" selection-end-line="307" selection-end-column="29" />
+            <state relative-caret-position="470">
+              <caret line="550" column="39" selection-start-line="550" selection-start-column="39" selection-end-line="550" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -407,7 +404,7 @@
       <workItem from="1477117131670" duration="35050000" />
       <workItem from="1477159792706" duration="5408000" />
       <workItem from="1477203675560" duration="25214000" />
-      <workItem from="1477240107213" duration="5596000" />
+      <workItem from="1477240107213" duration="6502000" />
     </task>
     <task id="LOCAL-00001" summary="Added Forward Mode to integrate with Simply Modbus Master tool">
       <created>1477131401753</created>
@@ -427,7 +424,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="71268000" />
+    <option name="totallyTimeSpent" value="72174000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-6" y="20" width="890" height="1000" extended-state="0" />
@@ -741,8 +738,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2161">
-          <caret line="307" column="29" selection-start-line="307" selection-start-column="29" selection-end-line="307" selection-end-column="29" />
+        <state relative-caret-position="470">
+          <caret line="550" column="39" selection-start-line="550" selection-start-column="39" selection-end-line="550" selection-end-column="39" />
           <folding />
         </state>
       </provider>
