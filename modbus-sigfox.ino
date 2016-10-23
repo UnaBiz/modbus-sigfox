@@ -117,7 +117,9 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
     //  Else read in the page.
     debugOutput.concat("Reading "); debugOutput.concat(max_register_page_size);
     debugOutput.concat(" words at "); debugOutput.concat(address); debugOutput.concat("\r\n");
+    node.clearResponseBuffer();
     uint8_t result = node.readHoldingRegisters(address, max_register_page_size);
+
     debugSerial.println(debugOutput); debugOutput = "";
     if (result != node.ku8MBSuccess) {
       //  Return the error.
@@ -128,15 +130,20 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
     //  Sample response:
     //    05 03 08 00 00 5d b8 00 00 00 00 2d b1
     //    Slave ID
-    //       Functon code
+    //       Function code
     //          Result size in bytes
     //             Result                  CRC
+    //  The code below only sees the Result words.
     register_page_address = address;
-    register_page_size = node.getResponseBuffer(0);
+    register_page_size = 0;
+    //  Read the entire page.
+    for (;;) {
+      if (register_page_size >= max_register_page_size) break;
+      if (!node.available()) break;
+      register_page_data[register_page_size++] = node.receive();
+    }
     debugSerial.print("Received "); debugSerial.print(register_page_size);
     debugSerial.println(" bytes");
-    for (uint16_t j = 0; j < register_page_size; j++)
-      register_page_data[j] = node.getResponseBuffer(j + 1);
   }
   //  Copy from our buffer to caller's buffer.
   uint16_t size2 = size;
@@ -272,38 +279,37 @@ void loop()
 /*
 Modbus Function Codes, Exception Codes
 
-static const uint8_t   ModbusMaster::ku8MBIllegalFunction = 0x01
+ku8MBIllegalFunction = 0x01
   Modbus protocol illegal function exception. More...
  
-static const uint8_t  ModbusMaster::ku8MBIllegalDataAddress = 0x02
+ku8MBIllegalDataAddress = 0x02
   Modbus protocol illegal data address exception. More...
  
-static const uint8_t  ModbusMaster::ku8MBIllegalDataValue = 0x03
+ku8MBIllegalDataValue = 0x03
   Modbus protocol illegal data value exception. More...
  
-static const uint8_t  ModbusMaster::ku8MBSlaveDeviceFailure = 0x04
+ku8MBSlaveDeviceFailure = 0x04
   Modbus protocol slave device failure exception. More...
  
-static const uint8_t  ModbusMaster::ku8MBSuccess = 0x00
+ku8MBSuccess = 0x00
   ModbusMaster success. More...
  
-static const uint8_t  ModbusMaster::ku8MBInvalidSlaveID = 0xE0
+ku8MBInvalidSlaveID = 0xE0
   ModbusMaster invalid response slave ID exception. More...
  
-static const uint8_t  ModbusMaster::ku8MBInvalidFunction = 0xE1
+ku8MBInvalidFunction = 0xE1
   ModbusMaster invalid response function exception. More...
  
-static const uint8_t  ModbusMaster::ku8MBResponseTimedOut = 0xE2
+ku8MBResponseTimedOut = 0xE2
   ModbusMaster response timed out exception. More...
  
-static const uint8_t  ModbusMaster::ku8MBInvalidCRC = 0xE3
+ku8MBInvalidCRC = 0xE3
   ModbusMaster invalid response CRC exception. More...
  
 Detailed Description
 
-§ ku8MBIllegalFunction
-const uint8_t ModbusMaster::ku8MBIllegalFunction = 0x01
-static
+-- ku8MBIllegalFunction
+ku8MBIllegalFunction = 0x01
 Modbus protocol illegal function exception.
 
 The function code received in the query is not an allowable action for the server (or slave). 
@@ -312,9 +318,8 @@ implemented in the unit selected. It could also indicate that the server (or sla
 wrong state to process a request of this type, for example because it is unconfigured and is 
 being asked to return register values.
 
-§ ku8MBIllegalDataAddress
-const uint8_t ModbusMaster::ku8MBIllegalDataAddress = 0x02
-static
+-- ku8MBIllegalDataAddress
+ku8MBIllegalDataAddress = 0x02
 Modbus protocol illegal data address exception.
 
 The data address received in the query is not an allowable address for the server (or slave). 
@@ -326,11 +331,8 @@ of 4, then this request will successfully operate (address-wise at least) on reg
 registers of 5, then this request will fail with Exception Code 0x02 "Illegal Data Address" 
 since it attempts to operate on registers 96, 97, 98, 99 and 100, and there is no register with address
 
-Examples:
-examples/PhoenixContact_nanoLC/PhoenixContact_nanoLC.pde.
-§ ku8MBIllegalDataValue
-const uint8_t ModbusMaster::ku8MBIllegalDataValue = 0x03
-static
+-- ku8MBIllegalDataValue
+ku8MBIllegalDataValue = 0x03
 Modbus protocol illegal data value exception.
 
 A value contained in the query data field is not an allowable value for server (or slave). 
@@ -339,53 +341,44 @@ the implied length is incorrect. It specifically does NOT mean that a data item 
 for storage in a register has a value outside the expectation of the application program, 
 since the MODBUS protocol is unaware of the significance of any particular value of any particular register.
 
-§ ku8MBSlaveDeviceFailure
-const uint8_t ModbusMaster::ku8MBSlaveDeviceFailure = 0x04
-static
+-- ku8MBSlaveDeviceFailure
+ku8MBSlaveDeviceFailure = 0x04
 Modbus protocol slave device failure exception.
 
 An unrecoverable error occurred while the server (or slave) was attempting to perform the 
 requested action.
 
-§ ku8MBSuccess
-const uint8_t ModbusMaster::ku8MBSuccess = 0x00
-static
+-- ku8MBSuccess
+ku8MBSuccess = 0x00
 ModbusMaster success.
 
 Modbus transaction was successful; the following checks were valid:
-
 slave ID
 function code
 response code
 data
 CRC
-Examples:
-examples/Basic/Basic.pde, and examples/RS485_HalfDuplex/RS485_HalfDuplex.ino.
 
-§ ku8MBInvalidSlaveID
-const uint8_t ModbusMaster::ku8MBInvalidSlaveID = 0xE0
-static
+-- ku8MBInvalidSlaveID
+ku8MBInvalidSlaveID = 0xE0
 ModbusMaster invalid response slave ID exception.
 
 The slave ID in the response does not match that of the request.
 
-§ ku8MBInvalidFunction
-const uint8_t ModbusMaster::ku8MBInvalidFunction = 0xE1
-static
+-- ku8MBInvalidFunction
+ku8MBInvalidFunction = 0xE1
 ModbusMaster invalid response function exception.
 
 The function code in the response does not match that of the request.
 
-§ ku8MBResponseTimedOut
-const uint8_t ModbusMaster::ku8MBResponseTimedOut = 0xE2
-static
+-- ku8MBResponseTimedOut
+ku8MBResponseTimedOut = 0xE2
 ModbusMaster response timed out exception.
 
 The entire response was not received within the timeout period, ModbusMaster::ku8MBResponseTimeout.
 
-§ ku8MBInvalidCRC
-const uint8_t ModbusMaster::ku8MBInvalidCRC = 0xE3
-static
+-- ku8MBInvalidCRC
+ku8MBInvalidCRC = 0xE3
 ModbusMaster invalid response CRC exception.
 
 The CRC in the response does not match the one calculated.

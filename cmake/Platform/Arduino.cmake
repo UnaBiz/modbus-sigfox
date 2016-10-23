@@ -1804,7 +1804,12 @@ function(SETUP_ARDUINO_SKETCH TARGET_NAME SKETCH_PATH OUTPUT_VAR)
         arduino_debug_msg("sketch: ${MAIN_SKETCH}")
 
         # Find all sketch files
-        file(GLOB SKETCH_SOURCES ${SKETCH_PATH}/*.pde ${SKETCH_PATH}/*.ino)
+        ####file(GLOB SKETCH_SOURCES ${SKETCH_PATH}/*.pde ${SKETCH_PATH}/*.ino)
+        file(GLOB SKETCH_SOURCES
+                ${SKETCH_PATH}/ModbusMaster/src/*.cpp #### Allow code analysis.
+                ${SKETCH_PATH}/unabiz-arduino-master/*.cpp #### Allow code analysis.
+                ${SKETCH_PATH}/*.pde
+                ${SKETCH_PATH}/*.ino) ####
         set(ALL_SRCS ${SKETCH_SOURCES})
 
         list(REMOVE_ITEM SKETCH_SOURCES ${MAIN_SKETCH})

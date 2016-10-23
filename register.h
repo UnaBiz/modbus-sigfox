@@ -10,11 +10,11 @@
 extern Akeru akeru;
 
 struct Register {
-  //  Every Modbus register is defined by its address and size.
-  const char *name;  //  Name of register.
+  //  Every Modbus register is defined by these attributes.
+  const char *name;        //  Name of register.
   const uint16_t address;  //  Address of register.
-  const uint16_t size;  //  In 16-bit words.
-  const char *unit;  //  Unit e.g. "A / 1000".
+  const uint16_t size;     //  In 16-bit words.
+  const char *unit;        //  Unit e.g. "A / 1000".
   const enum MODBUS_TYPES type;  //  Type of register e.g. TYPE_U32.
   const boolean transmit;  //  True if this register should be transmitted to SIGFOX.
 };
@@ -26,7 +26,7 @@ const Register all_registers[] = {  //  TODO: Move to Flash memory.
 };
 
 void parseType(Register reg, uint16_t data[], String &displayValue, String &transmitValue) {
-  //  Parse register types.
+  //  Parse register types for display and for sending to SIGFOX.
   displayValue = ""; transmitValue = "";
   if (false) {}
   else if (reg.type == TYPE_DATETIME_3) {

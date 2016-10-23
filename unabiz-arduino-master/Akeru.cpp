@@ -17,8 +17,12 @@
  *   - TD1208 downlink request
  *   - Data conversion in hexadecimal
  */
- 
+
+#ifdef CMAKE
+#include "unabiz-arduino-master/Akeru.h"
+#else  //  CMAKE
 #include "Akeru.h"
+#endif  //  CMAKE
 
 Akeru::Akeru(unsigned int rx, unsigned int tx)
 {
@@ -75,7 +79,8 @@ bool Akeru::isReady()
 
 bool Akeru::sendAT()
 {
-	return sendATCommand(ATCOMMAND, ATCOMMAND_TIMEOUT, nullptr);
+  String empty = ""; ////
+	return sendATCommand(ATCOMMAND, ATCOMMAND_TIMEOUT, &empty); ////
 }
 
 // Payload must be a String formatted in hexadecimal, 12 bytes max, use toHex()
