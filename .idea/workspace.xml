@@ -16,7 +16,10 @@
   <component name="ChangeListManager">
     <list default="true" id="87fe155f-2624-46c5-b610-3d695e5f9d87" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Flash/src/Flash.h" afterPath="$PROJECT_DIR$/Flash/src/Flash.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modbus-sigfox.ino" afterPath="$PROJECT_DIR$/modbus-sigfox.ino" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modbus-types.h" afterPath="$PROJECT_DIR$/modbus-types.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/register.h" afterPath="$PROJECT_DIR$/register.h" />
     </list>
     <ignored path="modbus-sigfox.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -36,13 +39,36 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="modbus-sigfox.ino" pinned="false" current-in-tab="true">
+      <file leaf-file-name="modbus-sigfox.ino" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="397">
-              <caret line="83" column="59" selection-start-line="83" selection-start-column="59" selection-end-line="83" selection-end-column="59" />
+            <state relative-caret-position="169">
+              <caret line="95" column="7" selection-start-line="95" selection-start-column="2" selection-end-line="95" selection-end-column="7" />
               <folding>
-                <element signature="e#994#1014#0" expanded="true" />
+                <element signature="e#8081#8253#0" expanded="true" />
+                <marker date="1477236093615" expanded="true" signature="0:992" ph="//..." />
+                <marker date="1477236093615" expanded="true" signature="1003:1203" ph="..." />
+                <marker date="1477236093615" expanded="true" signature="1205:1334" ph="//..." />
+                <marker date="1477236093615" expanded="true" signature="1431:1647" ph="//..." />
+                <marker date="1477236093615" expanded="false" signature="1669:1959" ph="..." />
+                <marker date="1477236093615" expanded="true" signature="2371:3104" ph="//..." />
+                <marker date="1477236093615" expanded="true" signature="3667:3743" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="3773:3865" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="3913:4012" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="4037:4342" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="4368:4790" ph="{...}" />
+                <marker date="1477236093615" expanded="false" signature="4812:5089" ph="..." />
+                <marker date="1477236093615" expanded="true" signature="5188:8264" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="8695:8790" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="8871:11517" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="11578:11692" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="11764:12341" ph="{...}" />
+                <marker date="1477236093615" expanded="true" signature="12350:12437" ph="//..." />
+                <marker date="1477236093615" expanded="true" signature="12452:14243" ph="{...}" />
+                <marker date="1477236093615" expanded="false" signature="12756:12782" ph="..." />
+                <marker date="1477236093615" expanded="true" signature="14257:16070" ph="{...}" />
+                <marker date="1477236093615" expanded="false" signature="14369:14501" ph="..." />
+                <marker date="1477236093615" expanded="true" signature="16072:19930" ph="/.../" />
               </folding>
             </state>
           </provider>
@@ -51,18 +77,30 @@
       <file leaf-file-name="ModbusMaster.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-12095">
-              <caret line="30" column="44" selection-start-line="30" selection-start-column="44" selection-end-line="30" selection-end-column="44" />
+            <state relative-caret-position="198">
+              <caret line="586" column="20" selection-start-line="586" selection-start-column="14" selection-end-line="586" selection-end-column="20" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="register.h" pinned="false" current-in-tab="false">
+      <file leaf-file-name="register.h" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/register.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="12" column="59" selection-start-line="12" selection-start-column="59" selection-end-line="12" selection-end-column="59" />
+            <state relative-caret-position="846">
+              <caret line="59" column="2" selection-start-line="59" selection-start-column="2" selection-end-line="59" selection-end-column="2" />
+              <folding>
+                <element signature="e#211#231#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Flash.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Flash/src/Flash.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="286">
+              <caret line="49" column="20" selection-start-line="49" selection-start-column="0" selection-end-line="50" selection-end-column="83" />
               <folding />
             </state>
           </provider>
@@ -71,9 +109,11 @@
       <file leaf-file-name="modbus-types.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modbus-types.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="2" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="378">
+              <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+              <folding>
+                <marker date="1477235292774" expanded="true" signature="249:489" ph="{...}" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -108,12 +148,13 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/unabiz-arduino-master/Akeru.cpp" />
-        <option value="$PROJECT_DIR$/modbus-types.h" />
-        <option value="$PROJECT_DIR$/register.h" />
         <option value="$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.h" />
         <option value="$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp" />
         <option value="$PROJECT_DIR$/cmake/Platform/Arduino.cmake" />
+        <option value="$PROJECT_DIR$/modbus-types.h" />
         <option value="$PROJECT_DIR$/modbus-sigfox.ino" />
+        <option value="$PROJECT_DIR$/Flash/src/Flash.h" />
+        <option value="$PROJECT_DIR$/register.h" />
       </list>
     </option>
   </component>
@@ -127,7 +168,7 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="-6" />
     <option name="y" value="20" />
-    <option name="width" value="988" />
+    <option name="width" value="890" />
     <option name="height" value="1000" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -509,7 +550,7 @@
       <updated>1477117130310</updated>
       <workItem from="1477117131670" duration="35050000" />
       <workItem from="1477159792706" duration="5408000" />
-      <workItem from="1477203675560" duration="11711000" />
+      <workItem from="1477203675560" duration="23163000" />
     </task>
     <task id="LOCAL-00001" summary="Added Forward Mode to integrate with Simply Modbus Master tool">
       <created>1477131401753</created>
@@ -529,14 +570,14 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="52169000" />
+    <option name="totallyTimeSpent" value="63621000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-6" y="20" width="988" height="1000" extended-state="0" />
+    <frame x="-6" y="20" width="890" height="1000" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32936978" sideWeight="0.49613258" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936978" sideWeight="0.49613258" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936978" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936978" sideWeight="0.5038674" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936978" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -584,7 +625,30 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#994#1014#0" expanded="true" />
+            <element signature="e#8081#8253#0" expanded="true" />
+            <marker date="1477236093615" expanded="true" signature="0:992" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="1003:1203" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="1205:1334" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="1431:1647" ph="//..." />
+            <marker date="1477236093615" expanded="false" signature="1669:1959" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="2371:3104" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="3667:3743" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="3773:3865" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="3913:4012" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="4037:4342" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="4368:4790" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="4812:5089" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="5188:8264" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="8695:8790" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="8871:11517" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="11578:11692" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="11764:12341" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="12350:12437" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="12452:14243" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="12756:12782" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="14257:16070" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="14369:14501" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="16072:19930" ph="/.../" />
           </folding>
         </state>
       </provider>
@@ -593,7 +657,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="12" column="63" selection-start-line="12" selection-start-column="63" selection-end-line="12" selection-end-column="63" />
-          <folding />
+          <folding>
+            <element signature="e#211#231#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -601,7 +667,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="36">
           <caret line="2" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1477235292774" expanded="true" signature="249:489" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -634,7 +702,30 @@
         <state relative-caret-position="432">
           <caret line="24" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
-            <element signature="e#994#1014#0" expanded="true" />
+            <element signature="e#8081#8253#0" expanded="true" />
+            <marker date="1477236093615" expanded="true" signature="0:992" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="1003:1203" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="1205:1334" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="1431:1647" ph="//..." />
+            <marker date="1477236093615" expanded="false" signature="1669:1959" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="2371:3104" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="3667:3743" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="3773:3865" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="3913:4012" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="4037:4342" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="4368:4790" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="4812:5089" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="5188:8264" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="8695:8790" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="8871:11517" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="11578:11692" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="11764:12341" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="12350:12437" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="12452:14243" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="12756:12782" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="14257:16070" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="14369:14501" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="16072:19930" ph="/.../" />
           </folding>
         </state>
       </provider>
@@ -643,7 +734,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#211#231#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -651,7 +744,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="504">
           <caret line="28" column="18" selection-start-line="28" selection-start-column="18" selection-end-line="28" selection-end-column="18" />
-          <folding />
+          <folding>
+            <marker date="1477235292774" expanded="true" signature="249:489" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -682,22 +777,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="178">
           <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/modbus-types.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/register.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="12" column="59" selection-start-line="12" selection-start-column="59" selection-end-line="12" selection-end-column="59" />
           <folding />
         </state>
       </provider>
@@ -766,28 +845,79 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Flash/src/Flash.h">
+    <entry file="file://$PROJECT_DIR$/modbus-types.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1685">
-          <caret line="125" column="18" selection-start-line="125" selection-start-column="18" selection-end-line="125" selection-end-column="18" />
-          <folding />
+        <state relative-caret-position="378">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+          <folding>
+            <marker date="1477235292774" expanded="true" signature="249:489" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ModbusMaster/src/ModbusMaster.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-12095">
-          <caret line="30" column="44" selection-start-line="30" selection-start-column="44" selection-end-line="30" selection-end-column="44" />
+        <state relative-caret-position="198">
+          <caret line="586" column="20" selection-start-line="586" selection-start-column="14" selection-end-line="586" selection-end-column="20" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/modbus-sigfox.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="397">
-          <caret line="83" column="59" selection-start-line="83" selection-start-column="59" selection-end-line="83" selection-end-column="59" />
+        <state relative-caret-position="169">
+          <caret line="95" column="7" selection-start-line="95" selection-start-column="2" selection-end-line="95" selection-end-column="7" />
           <folding>
-            <element signature="e#994#1014#0" expanded="true" />
+            <element signature="e#8081#8253#0" expanded="true" />
+            <marker date="1477236093615" expanded="true" signature="0:992" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="1003:1203" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="1205:1334" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="1431:1647" ph="//..." />
+            <marker date="1477236093615" expanded="false" signature="1669:1959" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="2371:3104" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="3667:3743" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="3773:3865" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="3913:4012" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="4037:4342" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="4368:4790" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="4812:5089" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="5188:8264" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="8695:8790" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="8871:11517" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="11578:11692" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="11764:12341" ph="{...}" />
+            <marker date="1477236093615" expanded="true" signature="12350:12437" ph="//..." />
+            <marker date="1477236093615" expanded="true" signature="12452:14243" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="12756:12782" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="14257:16070" ph="{...}" />
+            <marker date="1477236093615" expanded="false" signature="14369:14501" ph="..." />
+            <marker date="1477236093615" expanded="true" signature="16072:19930" ph="/.../" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Flash/src/Flash.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="49" column="20" selection-start-line="49" selection-start-column="0" selection-end-line="50" selection-end-column="83" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files (x86)/Arduino/hardware/tools/avr/avr/include/avr/pgmspace.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="271">
+          <caret line="403" column="9" selection-start-line="403" selection-start-column="9" selection-end-line="403" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/register.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="846">
+          <caret line="59" column="2" selection-start-line="59" selection-start-column="2" selection-end-line="59" selection-end-column="2" />
+          <folding>
+            <element signature="e#211#231#0" expanded="true" />
           </folding>
         </state>
       </provider>

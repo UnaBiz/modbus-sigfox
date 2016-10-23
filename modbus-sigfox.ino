@@ -116,6 +116,103 @@ void forwardLoop() {
 }
 #else
 
+void parseType(Register reg, uint16_t data[], String &displayValue, String &transmitValue) {
+  //  Parse register types for display and for sending to SIGFOX.
+  displayValue = ""; transmitValue = "";
+  if (false) {}
+  else if (reg.type == TYPE_DATETIME_3) {
+    for (uint16_t i = 0; i < 3; i++) {
+      uint16_t value = data[i];
+      if (i > 0) displayValue = displayValue + " ";
+      displayValue.concat(akeru.toHex(value));
+      transmitValue.concat(akeru.toHex(value));
+    }
+  }
+  else if (reg.type == TYPE_S16) {
+    int16_t result = data[0];
+    displayValue.concat(result);
+    transmitValue.concat(akeru.toHex(result));
+  }
+  else if (reg.type == TYPE_S32) {
+    int32_t result = ((int32_t) data[0] << 16) + data[1];
+    displayValue.concat(result);
+    transmitValue.concat(akeru.toHex(result));
+  }
+  else if (reg.type == TYPE_STRING_16) {
+    //  Unicode string.
+    const uint16_t count = reg.size;
+    for (uint16_t i = 0; i < count; i++) {
+      char value = (char) data[i];
+      displayValue.concat(value);
+      transmitValue.concat(akeru.toHex(value));
+    }
+  }
+  else if (reg.type == TYPE_STRING_NORM) {
+    //  ASCII string.
+    const uint16_t count = reg.size;
+    for (uint16_t i = 0; i < count; i++) {
+      uint16_t value = data[i];
+      char ch1 = (char) (value >> 8);
+      char ch2 = (char) (value & 0xff);
+      displayValue.concat(ch1); displayValue.concat(ch2);
+      transmitValue.concat(akeru.toHex(ch1));
+      transmitValue.concat(akeru.toHex(ch2));
+    }
+  }
+  else if (reg.type == TYPE_U16) {
+    uint16_t result = data[0];
+    displayValue.concat(result);
+    transmitValue.concat(akeru.toHex(result));
+  }
+  else if (reg.type == TYPE_U16_HEX) {
+    uint16_t result = data[0];
+    displayValue.concat(akeru.toHex(result));
+    transmitValue.concat(akeru.toHex(result));
+  }
+  else if (reg.type == TYPE_U16_ARRAY) {
+    const uint16_t count = reg.size;
+    for (uint16_t i = 0; i < count; i++) {
+      uint16_t value = data[i];
+      if (i > 0) displayValue = displayValue + ", ";
+      displayValue.concat(value);
+      transmitValue.concat(akeru.toHex(value));
+    }
+  }
+  else if (reg.type == TYPE_U32) {
+    uint32_t result = ((uint32_t) data[0] << 16) + data[1];
+    displayValue.concat(result);
+    transmitValue.concat(akeru.toHex(result));
+  }
+  else if (reg.type == TYPE_U32_ARRAY) {
+    const uint32_t count = reg.size / 2;
+    for (uint16_t i = 0; i < count; i++) {
+      uint32_t value = data[i];
+      if (i > 0) displayValue = displayValue + ", ";
+      displayValue.concat(value);
+      transmitValue.concat(akeru.toHex(value));
+    }
+  }
+  else if (reg.type == TYPE_U64_HEX) {
+    for (uint16_t i = 0; i < 8; i++) {
+      uint16_t value = data[i];
+      displayValue.concat(akeru.toHex(value));
+      transmitValue.concat(akeru.toHex(value));
+    }
+  }
+  else if (reg.type == TYPE_U8) {
+    uint8_t result = (uint8_t) data[0];
+    displayValue.concat(result);
+    transmitValue.concat(akeru.toHex(result));
+  }
+  #if NOTUSED
+  else if (reg.type == TYPE_U8_HEX) {
+    uint8_t result = (uint8_t) data[0];
+    displayValue.concat(akeru.toHex(result));
+    transmitValue.concat(akeru.toHex(result));
+  }
+  #endif
+}
+
 //  Cache registers in pages of 16 words.  Reading more than 16 words may be inaccurate.
 const uint16_t max_register_page_size = 12;  //  Number of words per page.
 uint16_t register_page_data[max_register_page_size];  //  Read registers one page at a time.
@@ -200,8 +297,9 @@ void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
   //  if it should be transmitted to SIGFOX.
   String displayValue = "", transmitValue = "";
   parseType(reg, data, displayValue, transmitValue);
-  debugSerial.print(reg.name); debugSerial.print(F(" = "));
-  debugSerial.print(displayValue); debugSerial.print(reg.unit);
+  debugSerial.print(String("[ ") + reg.address + " ] ");
+  debugSerial.print(reg.name); debugSerial.print(F(" =\r\n  "));
+  debugSerial.print(displayValue + " "); debugSerial.print(reg.unit);
   debugSerial.println(F(""));
   if (reg.transmit && (msg + transmitValue).length() <= 24)
     msg = msg + transmitValue;  //  Send to SIGFOX if we should transmit.
@@ -213,6 +311,8 @@ void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
 
 void setup()
 {
+  testRegisters(); ////
+
   ////////////////////////////////////////////////////////////
   //  Begin General Setup
   
@@ -287,7 +387,7 @@ void loop()
   debugPrint("[ "); debugPrint(String(loop_count++).c_str()); debugPrint(" ] ");
   for (uint16_t r = 0; r < all_registers_count; r++) {
     //  Read Modbus registers to data buffer.
-    const Register reg = all_registers[r];
+    const Register reg = OLD_all_registers[r];
     const uint8_t result = readHoldingRegister(reg, data);
     if (result == node.ku8MBSuccess)
       concatHoldingRegister(msg, reg, data);  //  Send data to SIGFOX.
