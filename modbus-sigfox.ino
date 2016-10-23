@@ -116,9 +116,9 @@ void forwardLoop() {
 }
 #else
 
-//  Cache registers in pages of 24 bytes.  Reading more than 24 bytes may be inaccurate.
-const uint16_t max_register_page_size = 24;  //  Read registers in pages of 24 bytes.
-uint8_t register_page_data[max_register_page_size];  //  Read registers one page at a time.
+//  Cache registers in pages of 16 words.  Reading more than 16 words may be inaccurate.
+const uint16_t max_register_page_size = 12;  //  Number of words per page.
+uint16_t register_page_data[max_register_page_size];  //  Read registers one page at a time.
 uint16_t register_page_address = 0xffff;  //  Address of last page read.
 uint16_t register_page_size = 0;  //  Size of last page read, in bytes.
 
@@ -150,7 +150,6 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
     //  The code below only sees the Result words.
     debugPrint(F("Reading ")); debugPrint(max_register_page_size);
     debugPrint(F(" words at ")); debugPrint(address); debugPrint(F("\r\n"));
-    node.clearResponseBuffer();
     uint8_t result = node.readHoldingRegisters(address, max_register_page_size);
 
     debugSerial.println(debugOutput); debugOutput[0] = 0;
@@ -201,9 +200,9 @@ void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
   //  if it should be transmitted to SIGFOX.
   String displayValue = "", transmitValue = "";
   parseType(reg, data, displayValue, transmitValue);
-  debugSerial.print(reg.name); debugSerial.print(" = ");
+  debugSerial.print(reg.name); debugSerial.print(F(" = "));
   debugSerial.print(displayValue); debugSerial.print(reg.unit);
-  debugSerial.println("");
+  debugSerial.println(F(""));
   if (reg.transmit && (msg + transmitValue).length() <= 24)
     msg = msg + transmitValue;  //  Send to SIGFOX if we should transmit.
 }
@@ -220,7 +219,7 @@ void setup()
   //  Initialize serial communication at 9600 bits per second:
   debugOutput[0] = 0;
   debugSerial.begin(9600);
-  debugSerial.println("Started modbus-sigfox");
+  debugSerial.println(F("Started modbus-sigfox"));
 #ifdef FORWARD_MODE
   forwardSerial.begin(9600);
 #endif  //  FORWARD_MODE
@@ -236,7 +235,7 @@ void setup()
   //  Use Serial (port 0); initialize Modbus communication baud rate
   Serial.begin(9600);
   //  Communicate with Modbus slave over Serial (port 0).
-  debugSerial.print("Communicating to Modbus Slave #"); debugSerial.println(slaveID);
+  debugSerial.print(F("Communicating to Modbus Slave #")); debugSerial.println(slaveID);
   node.begin(slaveID, Serial);
   //  Callbacks allow us to configure the RS485 transceiver correctly (set rs485_transmit=high/low).
   node.preTransmission(preTransmission);
@@ -249,9 +248,11 @@ void setup()
   //  Begin SIGFOX Module Setup
 
   // Check SIGFOX Module.
-  if (!akeru.begin()) {
-    debugSerial.println("****TD1208 KO");
-    ////while(1);
+  for (int i = 0; i < 5; i++) {
+    //  Retry because module may be powering up.
+    if (akeru.begin()) break;
+    if (i == 5) debugSerial.println(F("****TD1208 KO"));
+    delay(1000);
   }
   //  Must not show any debug output because it will interfere with RS485.
   //akeru.echoOn(); //  Comment this line to hide debug output.
@@ -261,7 +262,7 @@ void setup()
 
   //  Wait a while before starting.
   postTransmission();
-  delay(5000);
+  delay(1000);
 }
 
 void loop()
@@ -429,19 +430,51 @@ Expected output:
 Started modbus-sigfox
 Communicating to Modbus Slave #5
 Set rs485_transmit=low and delay before receive
-[ 0 ] Getting 2 words at 50520
-Reading 24 words at 50520
-Set rs485_transmit=high before transmit
-Send: 05 03 c5 58 00 18 f9 5b
-Receive: 05 03 30 00 00 5e eb 00 00 00
-Received 23 bytes
-simple_voltage_v1 = 235V / 100
-frequency_f = 138Hz / 100
-Message sent
-simple_voltage_v1 = 235V / 100
-frequency_f = 138Hz / 100
-Message sent
-simple_voltage
+[ 0 ] readHoldingRegisters: Getting 2 words at 50520
+Reading 12 words at 5052
+readHoldingRegisters: Received 11 words:
+0000 155f 0000 0000 0000 0000 0000 8913 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 155f
+simple_voltage_v1 = 24341V / 100
+readHoldingRegisters: Getting 2 words at 50526
+readHoldingRegisters: Return cache for 50526 size 2 words
 
+readHoldingRegisters: Returned 2 words:
+0000 8913
+frequency_f = 5001Hz / 100
+Message sent
+[ 1 ] readHoldingRegisters: Getting 2 words at 50520
+Reading 12 words at 50520
+Set rs485_transmit=high before transmit
+Modbu
+readHoldingRegisters: Received 11 words:
+0000 1c5f 0000 0000 0000 0000 0000 8913 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 1c5f
+simple_voltage_v1 = 24348V / 100
+readHoldingRegisters: Getting 2 words at 50526
+readHoldingRegisters: Return cache for 50526 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 8913
+frequency_f = 5001Hz / 100
+Message sent
+[ 2 ] readHoldingRegisters: Getting 2 words at 50520
+Reading 12 words at 50520
+Set rs485_transmit=high before transmit
+Modbu
+readHoldingRegisters: Received 11 words:
+0000 145f 0000 0000 0000 0000 0000 8a13 0000 0000 0000
+readHoldingRegisters: Returned 2 words:
+0000 145f
+simple_voltage_v1 = 24340V / 100
+readHoldingRegisters: Getting 2 words at 50526
+readHoldingRegisters: Return cache for 50526 size 2 words
+
+readHoldingRegisters: Returned 2 words:
+0000 8a13
+frequency_f = 5002Hz / 100
+Message sent
 */
 
