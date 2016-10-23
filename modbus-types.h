@@ -5,17 +5,12 @@
 
 //  Declare register types.
 enum MODBUS_TYPES {
-    TYPE_S16 = 3,
-    TYPE_S32 = 4,
-    TYPE_STRING_16 = 5,
-    TYPE_STRING_NORM = 6,
-    TYPE_U16 = 7,
-    TYPE_U16_HEX = 8,
-    TYPE_U16_ARRAY = 9,
-    TYPE_U32 = 10,
-    TYPE_U32_ARRAY = 11,
-    TYPE_U64_HEX = 12,
-    TYPE_U8 = 13,
+  TYPE_S32 = 3,
+  TYPE_U16 = 4,
+  TYPE_U16_ARRAY = 5,
+  TYPE_U32 = 6,
+  TYPE_U32_ARRAY = 7,
+  TYPE_U8 = 8,
 };
 
 #endif  //  MODBUS_TYPES_H

@@ -76,17 +76,37 @@ size_t debugOutputSize = sizeof(debugOutput);
 
 void debugPrint(const char *s) {
   //  Print to debug output.
+#ifdef DEBUG
   strlcat(debugOutput, s, debugOutputSize);
+#endif // DEBUG
 }
 
 void debugPrint(uint16_t u) {
   //  Print to debug output.
+#ifdef DEBUG
   strlcat(debugOutput, String(u).c_str(), debugOutputSize);
+#endif // DEBUG
+}
+
+void debugPrint(const String &s) {
+  //  Print to debug output.
+#ifdef DEBUG
+  strlcat(debugOutput, s.c_str(), debugOutputSize);
+#endif // DEBUG
 }
 
 void debugPrint(const __FlashStringHelper *s) {
   //  Print string to debug output.
+#ifdef DEBUG
   strlcat(debugOutput, String(s).c_str(), debugOutputSize);
+#endif // DEBUG
+}
+
+void debugFlush(SoftwareSerial s) {
+  //  Show the contents of the debug buffer on the serial device.
+#ifdef DEBUG
+  s.println(debugOutput); debugOutput[0] = 0;
+#endif // DEBUG
 }
 
 void preTransmission() {
@@ -129,17 +149,18 @@ void parseType(Register reg, uint16_t data[], String &displayValue, String &tran
       transmitValue.concat(akeru.toHex(value));
     }
   }
-  #endif
   else if (reg.type == TYPE_S16) {
     int16_t result = data[0];
     displayValue.concat(result);
     transmitValue.concat(akeru.toHex(result));
   }
+  #endif
   else if (reg.type == TYPE_S32) {
     int32_t result = ((int32_t) data[0] << 16) + data[1];
     displayValue.concat(result);
     transmitValue.concat(akeru.toHex(result));
   }
+  #if NOTUSED
   else if (reg.type == TYPE_STRING_16) {
     //  Unicode string.
     const uint16_t count = reg.size;
@@ -161,16 +182,19 @@ void parseType(Register reg, uint16_t data[], String &displayValue, String &tran
       transmitValue.concat(akeru.toHex(ch2));
     }
   }
+  #endif
   else if (reg.type == TYPE_U16) {
     uint16_t result = data[0];
     displayValue.concat(result);
     transmitValue.concat(akeru.toHex(result));
   }
+  #if NOTUSED
   else if (reg.type == TYPE_U16_HEX) {
     uint16_t result = data[0];
     displayValue.concat(akeru.toHex(result));
     transmitValue.concat(akeru.toHex(result));
   }
+  #endif
   else if (reg.type == TYPE_U16_ARRAY) {
     const uint16_t count = reg.size;
     for (uint16_t i = 0; i < count; i++) {
@@ -194,6 +218,7 @@ void parseType(Register reg, uint16_t data[], String &displayValue, String &tran
       transmitValue.concat(akeru.toHex(value));
     }
   }
+  #if NOTUSED
   else if (reg.type == TYPE_U64_HEX) {
     for (uint16_t i = 0; i < 8; i++) {
       uint16_t value = data[i];
@@ -201,6 +226,7 @@ void parseType(Register reg, uint16_t data[], String &displayValue, String &tran
       transmitValue.concat(akeru.toHex(value));
     }
   }
+  #endif
   else if (reg.type == TYPE_U8) {
     uint8_t result = (uint8_t) data[0];
     displayValue.concat(result);
@@ -238,7 +264,7 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
     debugPrint(F("readHoldingRegisters: Return cache for ")); debugPrint(address);
     debugPrint(F(" size ")); debugPrint(size);
     debugPrint(F(" words\r\n"));
-    debugSerial.println(debugOutput); debugOutput[0] = 0;
+    debugFlush(debugSerial);
   } else {
     //  Else read in the page from RS485, which looks like:
     //    05 03 08 00 00 5d b8 00 00 00 00 2d b1
@@ -251,16 +277,16 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
     debugPrint(F(" words at ")); debugPrint(address); debugPrint(F("\r\n"));
     uint8_t result = node.readHoldingRegisters(address, max_register_page_size);
 
-    debugSerial.println(debugOutput); debugOutput[0] = 0;
+    debugFlush(debugSerial);
     if (result != node.ku8MBSuccess) {
       //  Return the error.
-      debugSerial.print(F("Read failed: 0x"));
-      debugSerial.println(result, HEX);
+      debugPrint(F("Read failed: 0x")); debugPrint(String(result, HEX) + "\r\n");
+      debugFlush(debugSerial);
       return result;
     }
     register_page_address = address;
     register_page_size = 0;
-    String debugData = "";
+    String debugData = "  ";
     //  Read the entire page.
     for (;;) {
       if (register_page_size >= max_register_page_size) break;
@@ -270,22 +296,24 @@ uint8_t readHoldingRegisters(uint16_t address, uint16_t size, uint16_t data[]) {
       if (debugData != "") debugData.concat(" ");
       debugData.concat(akeru.toHex(w));
     }
-    debugSerial.print(F("readHoldingRegisters: Received ")); debugSerial.print(register_page_size);
-    debugSerial.println(F(" words:")); debugSerial.println(debugData);
+    debugPrint(F("readHoldingRegisters: Received ")); debugPrint(register_page_size);
+    debugPrint(F(" words:\r\n")); debugPrint(debugData + "\r\n");
+    debugFlush(debugSerial);
   }
   //  Copy from our buffer to caller's buffer.
   uint16_t size2 = size;
   if (size > register_page_address + register_page_size - address)
     size2 = register_page_address + register_page_size - address;
-  String debugData = "";
+  String debugData = "  ";
   for (uint16_t j = 0; j < size2; j++) {
     uint16_t w = register_page_data[address - register_page_address + j];
     data[j] = w;
     if (debugData != "") debugData.concat(" ");
     debugData.concat(akeru.toHex(w));
   }
-  debugSerial.print(F("readHoldingRegisters: Returned ")); debugSerial.print(size2);
-  debugSerial.println(F(" words:")); debugSerial.println(debugData);
+  debugPrint(F("readHoldingRegisters: Returned ")); debugPrint(size2);
+  debugPrint(F(" words:\r\n")); debugPrint(debugData + "\r\n");
+  debugFlush(debugSerial);
   return node.ku8MBSuccess;
 }
 
@@ -388,7 +416,7 @@ void loop()
   //  Read all registers and send selected registers to SIGFOX.
   clearRegisterCache();  //  Don't reuse the past register data.
   String msg = "";
-  debugPrint("------ Loop "); debugPrint(String(loop_count++).c_str()); debugPrint("\r\n");
+  debugPrint("\r\n\r\n------ Loop "); debugPrint(String(loop_count++).c_str()); debugPrint("\r\n");
   for (uint16_t r = 0; r < all_registers.rows(); r++) {
     //  Read Modbus registers to data buffer.
     Register reg = {
@@ -534,442 +562,739 @@ The CRC in the response does not match the one calculated.
 /*
 Expected output:
 
-tarted modbus-sigfox
+Started modbus-sigfox
 Communicating to Modbus Slave #5
 SIGFOX Module OK
-Set rs485_transmit=low and delay before receive
-[ 0 ] readHoldingRegisters: Getting 2 words at 50520
-Reading 12 words at 5052
-readHoldingRegisters: Received 11 words:
-0000 6f60 0000 0000 0000 0000 0000 8a13 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 6f60
-[ 50520 ] Simple voltage : V1 =
-  24687 V / 100
-readHoldingRegisters: Getting 2 words at 50512
-Reading 12 words at 50512
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 d106 0000 0000 0000 0000 0000 0000 0000 6f60 0000
-readHoldingRegisters: Returned 2 words:
-0000 d106
+[ 4098 ] TC list :TC 1 / TC2 / TC3 / TC4 / TC5 / =
+  65535, 65535, 65535, 65535 A
+[ 36353 ] Current Transformer secondary : 1: 1 A  =
+  5 A
+[ 36354 ] Current Transformer primary =
+  244 A
 [ 50512 ] Hour Meter =
-  1745 h / 100
-readHoldingRegisters: Getting 2 words at 50514
-readHoldingRegisters: Return cache for 50514 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
+  1808 h / 100
 [ 50514 ] Phase to Phase Voltage: U12 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50516
-readHoldingRegisters: Return cache for 50516 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50516 ] Phase to Phase Voltage: U23 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50518
-readHoldingRegisters: Return cache for 50518 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50518 ] Phase to Phase Voltage: U31 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50522
-Reading 12 words at 50522
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 0000 0000 0000 0000 8a13 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 0000
+[ 50520 ] Simple voltage : V1 =
+  24701 V / 100
 [ 50522 ] Simple voltage : V2 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50524
-readHoldingRegisters: Return cache for 50524 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50524 ] Simple voltage : V3 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50526
-readHoldingRegisters: Return cache for 50526 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 8a13
 [ 50526 ] Frequency : F =
-  5002 Hz / 100
-readHoldingRegisters: Getting 2 words at 50528
-readHoldingRegisters: Return cache for 50528 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
+  5001 Hz / 100
 [ 50528 ] Current : I1 =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50530
-readHoldingRegisters: Return cache for 50530 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50530 ] Current : I2 =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50532
-Reading 12 words at 50532
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50532 ] Current : I3 =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50534
-readHoldingRegisters: Return cache for 50534 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50534 ] Neutral Current : In =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50536
-readHoldingRegisters: Return cache for 50536 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50536 ] Active Power +/- : P =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50538
-readHoldingRegisters: Return cache for 50538 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50538 ] Reactive Power +/- : Q =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50540
-readHoldingRegisters: Return cache for 50540 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50540 ] Apparent Power : S =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50542
-Reading 12 words at 50542
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 e803 0000 0000 0000 0000 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50542 ] Power Factor : -: leading et + : laggin =
   1000 - / 1000
-readHoldingRegisters: Getting 2 words at 50544
-readHoldingRegisters: Return cache for 50544 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50544 ] Active Power phase 1 +/- : P1 =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50546
-readHoldingRegisters: Return cache for 50546 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50546 ] Active Power phase 2 +/- : P2 =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50548
-readHoldingRegisters: Return cache for 50548 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50548 ] Active Power phase 3 +/- : P3 =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50550
-readHoldingRegisters: Return cache for 50550 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50550 ] Reactive Power phase 1 +/- : Q1 =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50552
-Reading 12 words at 50552
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50552 ] Reactive Power phase 2 +/- : Q2 =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50554
-readHoldingRegisters: Return cache for 50554 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50554 ] Reactive Power phase 3 +/- : Q3 =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50556
-readHoldingRegisters: Return cache for 50556 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50556 ] Apparent Power phase 1 : S1 =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50558
-readHoldingRegisters: Return cache for 50558 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50558 ] Apparent Power phase 2 : S2 =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50560
-readHoldingRegisters: Return cache for 50560 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50560 ] Apparent Power phase 3 : S3 =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50562
-Reading 12 words at 50562
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 e803 0000 e803 0000 e803 ffff ffff ffff ffff ffff
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50562 ] Power Factor phase 1 -: leading and + : =
   1000 - / 1000
-readHoldingRegisters: Getting 2 words at 50564
-readHoldingRegisters: Return cache for 50564 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50564 ] Power Factor phase 2 -: leading and + : =
   1000 - / 1000
-readHoldingRegisters: Getting 2 words at 50566
-readHoldingRegisters: Return cache for 50566 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50566 ] Power Factor phase 3 -: leading and + : =
   1000 - / 1000
+[ 50768 ] Hour Meter =
+  1808 h / 100
+[ 50780 ] Partial Positive Active Energy: Ea+ =
+  0 Wh / 0.001
+[ 50782 ] Partial Positive Reactive Energy: Er + =
+  0 varh / 0.00
+[ 51070 ] Max/avg I1 =
+  0 A / 1000
+[ 51072 ] Max/avg I2 =
+  0 A / 1000
+[ 51074 ] Max/avg I3 =
+  0 A / 1000
+[ 51076 ] Max/avg In =
+  0 A / 1000
+[ 51078 ] Max/avg P+ =
+  0 W / 0.1
+[ 51082 ] Max/avg Q+ =
+  0 var / 0.1
+[ 51086 ] Max/avg S =
+  0 VA / 0.1
+[ 51280 ] Hour Meter =
+  18 h
+[ 51281 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 51282 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 51283 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 51284 ] Simple voltage : V1 =
+  24714 V / 100
+[ 51285 ] Simple voltage : V2 =
+  0 V / 100
+[ 51286 ] Simple voltage : V3 =
+  0 V / 100
+[ 51287 ] Frequency : F =
+  5000 Hz / 100
+[ 51288 ] Current : I1 =
+  0 A / 1000
+[ 51289 ] Current : I2 =
+  0 A / 1000
+[ 51290 ] Current : I3 =
+  0 A / 1000
+[ 51291 ] Neutral Current : In =
+  0 A / 1000
+[ 51292 ] Active Power +/- : P =
+   W / 0.1
+[ 51293 ] Reactive Power +/- : Q =
+   var / 0.1
+[ 51294 ] Apparent Power : S =
+  0 VA / 0.1
+[ 51295 ] power factor : -: leading and + : laggi =
+   - / 1000
+[ 51296 ] Active Power phase 1 +/- : P1 =
+   W / 0.1
+[ 51297 ] Active Power phase 2 +/- : P2 =
+   W / 0.1
+[ 51298 ] Active Power phase 3 +/- : P3 =
+   W / 0.1
+[ 51299 ] Reactive Power phase 1 +/- : Q1 =
+   var / 0.1
+[ 51300 ] Reactive Power phase 2 +/- : Q2 =
+   var / 0.1
+[ 51301 ] Reactive Power phase 3 +/- : Q3 =
+   var / 0.1
+[ 51302 ] Apparent Power phase 1 : S1 =
+  0 VA / 0.1
+[ 51303 ] Apparent Power phase 2 : S2 =
+  0 VA / 0.1
+[ 51304 ] Apparent Power phase 3 : S3 =
+  0 VA / 0.1
+[ 51305 ] Power Factor phase 1 -: leading and + : =
+   - / 1000
+[ 51306 ] Power Factor phase 2 -: leading and + : =
+   - / 1000
+[ 51307 ] Power Factor phase 3 -: leading and + : =
+   - / 1000
+[ 51311 ] Total Positive Active Energy (no reseta =
+  0 Wh / 1E-06
+[ 768 ] Phase 1 Current =
+  0 A / 1000
+[ 770 ] Phase 2 Current =
+  0 A / 1000
+[ 772 ] Phase 3 Current =
+  0 A / 1000
+[ 774 ] Neutral Current =
+  0 A / 1000
+[ 776 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 778 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 780 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 782 ] Phase to Neutral voltage phase 1 =
+  24701 V / 100
+[ 784 ] Phase to Neutral voltage phase 2 =
+  0 V / 100
+[ 786 ] Phase to Neutral voltage phase 3 =
+  0 V / 100
+[ 788 ] Frequency =
+  4999 Hz / 100
+[ 790 ] Active Power +/- : P =
+  0 W / 0.1
+[ 792 ] Reactive Power +/- : Q =
+  0 var / 0.1
+[ 794 ] Apparent Power : S =
+  0 VA / 0.1
+[ 796 ] power factor : -: leadiing et + : laggi =
+  1000 - / 1000
+[ 798 ] Active Power phase1 +/- =
+  0 W / 0.1
+[ 800 ] Active Power phase2 +/- =
+  0 W / 0.1
+[ 802 ] Active Power phase3 +/- =
+  0 W / 0.1
+[ 804 ] Reactive Power phase1 +/- =
+  0 var / 0.1
+[ 806 ] Reactive Power phase2 +/- =
+  0 var / 0.1
+[ 808 ] Reactive Power phase3 +/- =
+  0 var / 0.1
+[ 810 ] Apparent Power phase1 =
+  0 VA / 0.1
+[ 812 ] Apparent Power phase2 =
+  0 VA / 0.1
+[ 814 ] Apparent Power phase3 =
+  0 VA / 0.1
+[ 816 ] Power factor phase 1 -:leading and +: l =
+  1000 - / 1000
+[ 818 ] Power factor phase 2 -:leading and +: l =
+  1000 - / 1000
+[ 820 ] Power factor phase 3 -:leading and +: l =
+  1000 - / 1000
+[ 838 ] Max/avg I1 =
+  0 A / 1000
+[ 840 ] Max/avg I2 =
+  0 A / 1000
+[ 842 ] Max/avg I3 =
+  0 A / 1000
+[ 844 ] max/avg active power + =
+  0 W / 0.1
+[ 848 ] max/avg reactive power + =
+  0 var / 0.1
+[ 852 ] max/avg apparent power =
+  0 VA / 0.1
+[ 854 ] Hour Meter =
+  1808 h / 100
+[ 856 ] Active Energy + =
+  0 Wh / 0.001
+[ 858 ] Reactive Energy + =
+  0 varh / 0.00
+[ 1792 ] Phase 1 Current =
+  0 A / 1000
+[ 1793 ] Phase 2 Current =
+  0 A / 1000
+[ 1794 ] Phase 3 Current =
+  0 A / 1000
+[ 1795 ] Neutral Current =
+  0 A / 1000
+[ 1796 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 1797 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 1798 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 1799 ] Phase to Neutral voltage phase 1 =
+  24714 V / 100
+[ 1800 ] Phase to Neutral voltage phase 2 =
+  0 V / 100
+[ 1801 ] Phase to Neutral voltage phase 3 =
+  0 V / 100
+[ 1802 ] Frequency =
+  4999 Hz / 100
+[ 1803 ] Active Power +/- : P =
+   W / 0.1
+[ 1804 ] Reactive Power +/- : Q =
+   var / 0.1
+[ 1805 ] Apparent Power : S =
+  0 VA / 0.1
+[ 1806 ] power factor : -: leadiing et + : laggi =
+   - / 1000
+[ 1807 ] Active Power phase1 +/- =
+   W / 0.1
+[ 1808 ] Active Power phase2 +/- =
+   W / 0.1
+[ 1809 ] Active Power phase3 +/- =
+   W / 0.1
+[ 1810 ] Reactive Power phase1 +/- =
+   var / 0.1
+[ 1811 ] Reactive Power phase2 +/- =
+   var / 0.1
+[ 1812 ] Reactive Power phase3 +/- =
+   var / 0.1
+[ 1813 ] Apparent Power phase1 =
+  0 VA / 0.1
+[ 1814 ] Apparent Power phase2 =
+  0 VA / 0.1
+[ 1815 ] Apparent Power phase3 =
+  0 VA / 0.1
+[ 1816 ] Power factor phase 1 -:leading and +: l =
+   - / 1000
+[ 1817 ] Power factor phase 2 -:leading and +: l =
+   - / 1000
+[ 1818 ] Power factor phase 3 -:leading and +: l =
+   - / 1000
+[ 1827 ] Max/avg I1 =
+  0 A / 1000
+[ 1828 ] Max/avg I2 =
+  0 A / 1000
+[ 1829 ] Max/avg I3 =
+  0 A / 1000
+[ 1830 ] max/avg active power + =
+  0 W / 0.1
+[ 1832 ] max/avg reactive power + =
+  0 var / 0.1
+[ 1834 ] max/avg apparent power =
+  0 VA / 0.1
+[ 1835 ] Active Energy +<10 000 =
+  0 Wh / 0.001
+[ 1836 ] Active Energy +>10 000 =
+  0 Wh / 0.001
+[ 1837 ] Reactive Energy+< 10 000 =
+  0 varh / 0.00
+[ 1838 ] Reactive Energy +>10 000 =
+  0 varh / 0.00
+[ 36820 ] Action Calib =
+  0 A
+[ 36821 ] Set Relais Impul =
+  0 A
+[ 36822 ] Clr Relais Impulsion =
+  0 A
+[ 36825 ] Coef Gnrale Courant =
+  0, 0, 0, 0 A
+[ 2816 ] Current : I1 =
+  0 A / 1000
+[ 2817 ] Current : I2 =
+  0 A / 1000
+[ 2818 ] Current : I3 =
+  0 A / 1000
+[ 2819 ] Neutral Current : In =
+  0 A / 1000
+[ 2820 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 2821 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 2822 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 2823 ] Simple voltage : V1 =
+  24700 V / 100
+[ 2824 ] Simple voltage : V2 =
+  0 V / 100
+[ 2825 ] Simple voltage : V3 =
+  0 V / 100
+[ 2826 ] Frequency : Fr =
+  4999 Hz / 100
+[ 2827 ] Total Active Power +/- : P =
+   W / 0.1
+[ 2828 ] Total Reactive Power +/- : Q =
+   var / 0.1
+[ 2829 ] Total apparent power : S =
+  0 VA / 0.1
+[ 2830 ] Power factor : -: capacitif et + : indu =
+   - / 1000
+[ 2831 ] I 1 AVG MAX =
+  0 A / 1000
+[ 2832 ] I 2 AVG MAX =
+  0 A / 1000
+[ 2833 ] I 3 AVG MAX =
+  0 A / 1000
+[ 2834 ] In AVG MAX =
+  0 A / 1000
+[ 2835 ] P+ AVG MAX =
+  0 W / 0.1
+[ 2836 ] Active Energy +<10 000 =
+  0 Wh / 0.001
+[ 2837 ] Active Energy +>10 000 =
+  0 Wh / 0.001
+[ 2838 ] Reactive Energy+< 10 000 =
+  0 varh / 0.00
+[ 2839 ] Reactive Energy +>10 000 =
+  0 varh / 0.00
+[ 2840 ] Hour Meter +<10000 =
+  1808 h / 100
+[ 2841 ] Hour Meter +>10000 =
+  0 h / 100
+[ 2842 ] Active Power phase1 +/- =
+   W / 0.1
+[ 2843 ] Active Power phase2 +/- =
+   W / 0.1
+[ 2844 ] Active Power phase3 +/- =
+   W / 0.1
+[ 2845 ] Reactive Power phase1 +/- =
+   var / 0.1
+[ 2846 ] Reactive Power phase2 +/- =
+   var / 0.1
+[ 2847 ] Reactive Power phase3 +/- =
+   var / 0.1
+[ 2848 ] Apparent Power phase1 =
+  0 VA / 0.1
+[ 513 ] Current Transformer secondary : 1: 1 A  =
+  5 A
+[ 514 ] Current Transformer primary =
+  244 A
 Message sent
-[ 1 ] readHoldingRegisters: Getting 2 words at 50520
-Reading 12 words at 50520
-Set rs485_transmit=high before transmit
-Modbu
-readHoldingRegisters: Received 11 words:
-0000 7960 0000 0000 0000 0000 0000 8b13 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 7960
-[ 50520 ] Simple voltage : V1 =
-  24697 V / 100
-readHoldingRegisters: Getting 2 words at 50512
-Reading 12 words at 50512
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 d206 0000 0000 0000 0000 0000 0000 0000 7960 0000
-readHoldingRegisters: Returned 2 words:
-0000 d206
+[ 4098 ] TC list :TC 1 / TC2 / TC3 / TC4 / TC5 / =
+  65535, 65535, 65535, 65535 A
+[ 36353 ] Current Transformer secondary : 1: 1 A  =
+  5 A
+[ 36354 ] Current Transformer primary =
+  244 A
 [ 50512 ] Hour Meter =
-  1746 h / 100
-readHoldingRegisters: Getting 2 words at 50514
-readHoldingRegisters: Return cache for 50514 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
+  1808 h / 100
 [ 50514 ] Phase to Phase Voltage: U12 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50516
-readHoldingRegisters: Return cache for 50516 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50516 ] Phase to Phase Voltage: U23 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50518
-readHoldingRegisters: Return cache for 50518 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50518 ] Phase to Phase Voltage: U31 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50522
-Reading 12 words at 50522
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 0000 0000 0000 0000 8b13 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 0000
+[ 50520 ] Simple voltage : V1 =
+  24678 V / 100
 [ 50522 ] Simple voltage : V2 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50524
-readHoldingRegisters: Return cache for 50524 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50524 ] Simple voltage : V3 =
   0 V / 100
-readHoldingRegisters: Getting 2 words at 50526
-readHoldingRegisters: Return cache for 50526 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 8b13
 [ 50526 ] Frequency : F =
-  5003 Hz / 100
-readHoldingRegisters: Getting 2 words at 50528
-readHoldingRegisters: Return cache for 50528 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
+  4998 Hz / 100
 [ 50528 ] Current : I1 =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50530
-readHoldingRegisters: Return cache for 50530 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50530 ] Current : I2 =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50532
-Reading 12 words at 50532
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50532 ] Current : I3 =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50534
-readHoldingRegisters: Return cache for 50534 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50534 ] Neutral Current : In =
   0 A / 1000
-readHoldingRegisters: Getting 2 words at 50536
-readHoldingRegisters: Return cache for 50536 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50536 ] Active Power +/- : P =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50538
-readHoldingRegisters: Return cache for 50538 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50538 ] Reactive Power +/- : Q =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50540
-readHoldingRegisters: Return cache for 50540 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50540 ] Apparent Power : S =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50542
-Reading 12 words at 50542
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 e803 0000 0000 0000 0000 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50542 ] Power Factor : -: leading et + : laggin =
   1000 - / 1000
-readHoldingRegisters: Getting 2 words at 50544
-readHoldingRegisters: Return cache for 50544 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50544 ] Active Power phase 1 +/- : P1 =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50546
-readHoldingRegisters: Return cache for 50546 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50546 ] Active Power phase 2 +/- : P2 =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50548
-readHoldingRegisters: Return cache for 50548 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50548 ] Active Power phase 3 +/- : P3 =
   0 W / 0.1
-readHoldingRegisters: Getting 2 words at 50550
-readHoldingRegisters: Return cache for 50550 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50550 ] Reactive Power phase 1 +/- : Q1 =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50552
-Reading 12 words at 50552
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50552 ] Reactive Power phase 2 +/- : Q2 =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50554
-readHoldingRegisters: Return cache for 50554 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50554 ] Reactive Power phase 3 +/- : Q3 =
   0 var / 0.1
-readHoldingRegisters: Getting 2 words at 50556
-readHoldingRegisters: Return cache for 50556 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50556 ] Apparent Power phase 1 : S1 =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50558
-readHoldingRegisters: Return cache for 50558 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50558 ] Apparent Power phase 2 : S2 =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50560
-readHoldingRegisters: Return cache for 50560 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 0000
 [ 50560 ] Apparent Power phase 3 : S3 =
   0 VA / 0.1
-readHoldingRegisters: Getting 2 words at 50562
-Reading 12 words at 50562
-Set rs485_transmit=high before transmit
-ModbusMaste
-readHoldingRegisters: Received 11 words:
-0000 e803 0000 e803 0000 e803 ffff ffff ffff ffff ffff
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50562 ] Power Factor phase 1 -: leading and + : =
   1000 - / 1000
-readHoldingRegisters: Getting 2 words at 50564
-readHoldingRegisters: Return cache for 50564 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50564 ] Power Factor phase 2 -: leading and + : =
   1000 - / 1000
-readHoldingRegisters: Getting 2 words at 50566
-readHoldingRegisters: Return cache for 50566 size 2 words
-
-readHoldingRegisters: Returned 2 words:
-0000 e803
 [ 50566 ] Power Factor phase 3 -: leading and + : =
   1000 - / 1000
+[ 50768 ] Hour Meter =
+  1808 h / 100
+[ 50780 ] Partial Positive Active Energy: Ea+ =
+  0 Wh / 0.001
+[ 50782 ] Partial Positive Reactive Energy: Er + =
+  0 varh / 0.00
+[ 51070 ] Max/avg I1 =
+  0 A / 1000
+[ 51072 ] Max/avg I2 =
+  0 A / 1000
+[ 51074 ] Max/avg I3 =
+  0 A / 1000
+[ 51076 ] Max/avg In =
+  0 A / 1000
+[ 51078 ] Max/avg P+ =
+  0 W / 0.1
+[ 51082 ] Max/avg Q+ =
+  0 var / 0.1
+[ 51086 ] Max/avg S =
+  0 VA / 0.1
+[ 51280 ] Hour Meter =
+  18 h
+[ 51281 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 51282 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 51283 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 51284 ] Simple voltage : V1 =
+  24665 V / 100
+[ 51285 ] Simple voltage : V2 =
+  0 V / 100
+[ 51286 ] Simple voltage : V3 =
+  0 V / 100
+[ 51287 ] Frequency : F =
+  4999 Hz / 100
+[ 51288 ] Current : I1 =
+  0 A / 1000
+[ 51289 ] Current : I2 =
+  0 A / 1000
+[ 51290 ] Current : I3 =
+  0 A / 1000
+[ 51291 ] Neutral Current : In =
+  0 A / 1000
+[ 51292 ] Active Power +/- : P =
+   W / 0.1
+[ 51293 ] Reactive Power +/- : Q =
+   var / 0.1
+[ 51294 ] Apparent Power : S =
+  0 VA / 0.1
+[ 51295 ] power factor : -: leading and + : laggi =
+   - / 1000
+[ 51296 ] Active Power phase 1 +/- : P1 =
+   W / 0.1
+[ 51297 ] Active Power phase 2 +/- : P2 =
+   W / 0.1
+[ 51298 ] Active Power phase 3 +/- : P3 =
+   W / 0.1
+[ 51299 ] Reactive Power phase 1 +/- : Q1 =
+   var / 0.1
+[ 51300 ] Reactive Power phase 2 +/- : Q2 =
+   var / 0.1
+[ 51301 ] Reactive Power phase 3 +/- : Q3 =
+   var / 0.1
+[ 51302 ] Apparent Power phase 1 : S1 =
+  0 VA / 0.1
+[ 51303 ] Apparent Power phase 2 : S2 =
+  0 VA / 0.1
+[ 51304 ] Apparent Power phase 3 : S3 =
+  0 VA / 0.1
+[ 51305 ] Power Factor phase 1 -: leading and + : =
+   - / 1000
+[ 51306 ] Power Factor phase 2 -: leading and + : =
+   - / 1000
+[ 51307 ] Power Factor phase 3 -: leading and + : =
+   - / 1000
+[ 51311 ] Total Positive Active Energy (no reseta =
+  0 Wh / 1E-06
+[ 768 ] Phase 1 Current =
+  0 A / 1000
+[ 770 ] Phase 2 Current =
+  0 A / 1000
+[ 772 ] Phase 3 Current =
+  0 A / 1000
+[ 774 ] Neutral Current =
+  0 A / 1000
+[ 776 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 778 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 780 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 782 ] Phase to Neutral voltage phase 1 =
+  24664 V / 100
+[ 784 ] Phase to Neutral voltage phase 2 =
+  0 V / 100
+[ 786 ] Phase to Neutral voltage phase 3 =
+  0 V / 100
+[ 788 ] Frequency =
+  4998 Hz / 100
+[ 790 ] Active Power +/- : P =
+  0 W / 0.1
+[ 792 ] Reactive Power +/- : Q =
+  0 var / 0.1
+[ 794 ] Apparent Power : S =
+  0 VA / 0.1
+[ 796 ] power factor : -: leadiing et + : laggi =
+  1000 - / 1000
+[ 798 ] Active Power phase1 +/- =
+  0 W / 0.1
+[ 800 ] Active Power phase2 +/- =
+  0 W / 0.1
+[ 802 ] Active Power phase3 +/- =
+  0 W / 0.1
+[ 804 ] Reactive Power phase1 +/- =
+  0 var / 0.1
+[ 806 ] Reactive Power phase2 +/- =
+  0 var / 0.1
+[ 808 ] Reactive Power phase3 +/- =
+  0 var / 0.1
+[ 810 ] Apparent Power phase1 =
+  0 VA / 0.1
+[ 812 ] Apparent Power phase2 =
+  0 VA / 0.1
+[ 814 ] Apparent Power phase3 =
+  0 VA / 0.1
+[ 816 ] Power factor phase 1 -:leading and +: l =
+  1000 - / 1000
+[ 818 ] Power factor phase 2 -:leading and +: l =
+  1000 - / 1000
+[ 820 ] Power factor phase 3 -:leading and +: l =
+  1000 - / 1000
+[ 838 ] Max/avg I1 =
+  0 A / 1000
+[ 840 ] Max/avg I2 =
+  0 A / 1000
+[ 842 ] Max/avg I3 =
+  0 A / 1000
+[ 844 ] max/avg active power + =
+  0 W / 0.1
+[ 848 ] max/avg reactive power + =
+  0 var / 0.1
+[ 852 ] max/avg apparent power =
+  0 VA / 0.1
+[ 854 ] Hour Meter =
+  1808 h / 100
+[ 856 ] Active Energy + =
+  0 Wh / 0.001
+[ 858 ] Reactive Energy + =
+  0 varh / 0.00
+[ 1792 ] Phase 1 Current =
+  0 A / 1000
+[ 1793 ] Phase 2 Current =
+  0 A / 1000
+[ 1794 ] Phase 3 Current =
+  0 A / 1000
+[ 1795 ] Neutral Current =
+  0 A / 1000
+[ 1796 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 1797 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 1798 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 1799 ] Phase to Neutral voltage phase 1 =
+  24658 V / 100
+[ 1800 ] Phase to Neutral voltage phase 2 =
+  0 V / 100
+[ 1801 ] Phase to Neutral voltage phase 3 =
+  0 V / 100
+[ 1802 ] Frequency =
+  4998 Hz / 100
+[ 1803 ] Active Power +/- : P =
+   W / 0.1
+[ 1804 ] Reactive Power +/- : Q =
+   var / 0.1
+[ 1805 ] Apparent Power : S =
+  0 VA / 0.1
+[ 1806 ] power factor : -: leadiing et + : laggi =
+   - / 1000
+[ 1807 ] Active Power phase1 +/- =
+   W / 0.1
+[ 1808 ] Active Power phase2 +/- =
+   W / 0.1
+[ 1809 ] Active Power phase3 +/- =
+   W / 0.1
+[ 1810 ] Reactive Power phase1 +/- =
+   var / 0.1
+[ 1811 ] Reactive Power phase2 +/- =
+   var / 0.1
+[ 1812 ] Reactive Power phase3 +/- =
+   var / 0.1
+[ 1813 ] Apparent Power phase1 =
+  0 VA / 0.1
+[ 1814 ] Apparent Power phase2 =
+  0 VA / 0.1
+[ 1815 ] Apparent Power phase3 =
+  0 VA / 0.1
+[ 1816 ] Power factor phase 1 -:leading and +: l =
+   - / 1000
+[ 1817 ] Power factor phase 2 -:leading and +: l =
+   - / 1000
+[ 1818 ] Power factor phase 3 -:leading and +: l =
+   - / 1000
+[ 1827 ] Max/avg I1 =
+  0 A / 1000
+[ 1828 ] Max/avg I2 =
+  0 A / 1000
+[ 1829 ] Max/avg I3 =
+  0 A / 1000
+[ 1830 ] max/avg active power + =
+  0 W / 0.1
+[ 1832 ] max/avg reactive power + =
+  0 var / 0.1
+[ 1834 ] max/avg apparent power =
+  0 VA / 0.1
+[ 1835 ] Active Energy +<10 000 =
+  0 Wh / 0.001
+[ 1836 ] Active Energy +>10 000 =
+  0 Wh / 0.001
+[ 1837 ] Reactive Energy+< 10 000 =
+  0 varh / 0.00
+[ 1838 ] Reactive Energy +>10 000 =
+  0 varh / 0.00
+[ 36820 ] Action Calib =
+  0 A
+[ 36821 ] Set Relais Impul =
+  0 A
+[ 36822 ] Clr Relais Impulsion =
+  0 A
+[ 36825 ] Coef Gnrale Courant =
+  0, 0, 0, 0 A
+[ 2816 ] Current : I1 =
+  0 A / 1000
+[ 2817 ] Current : I2 =
+  0 A / 1000
+[ 2818 ] Current : I3 =
+  0 A / 1000
+[ 2819 ] Neutral Current : In =
+  0 A / 1000
+[ 2820 ] Phase to Phase Voltage: U12 =
+  0 V / 100
+[ 2821 ] Phase to Phase Voltage: U23 =
+  0 V / 100
+[ 2822 ] Phase to Phase Voltage: U31 =
+  0 V / 100
+[ 2823 ] Simple voltage : V1 =
+  24660 V / 100
+[ 2824 ] Simple voltage : V2 =
+  0 V / 100
+[ 2825 ] Simple voltage : V3 =
+  0 V / 100
+[ 2826 ] Frequency : Fr =
+  4999 Hz / 100
+[ 2827 ] Total Active Power +/- : P =
+   W / 0.1
+[ 2828 ] Total Reactive Power +/- : Q =
+   var / 0.1
+[ 2829 ] Total apparent power : S =
+  0 VA / 0.1
+[ 2830 ] Power factor : -: capacitif et + : indu =
+   - / 1000
+[ 2831 ] I 1 AVG MAX =
+  0 A / 1000
+[ 2832 ] I 2 AVG MAX =
+  0 A / 1000
+[ 2833 ] I 3 AVG MAX =
+  0 A / 1000
+[ 2834 ] In AVG MAX =
+  0 A / 1000
+[ 2835 ] P+ AVG MAX =
+  0 W / 0.1
+[ 2836 ] Active Energy +<10 000 =
+  0 Wh / 0.001
+[ 2837 ] Active Energy +>10 000 =
+  0 Wh / 0.001
+[ 2838 ] Reactive Energy+< 10 000 =
+  0 varh / 0.00
+[ 2839 ] Reactive Energy +>10 000 =
+  0 varh / 0.00
+[ 2840 ] Hour Meter +<10000 =
+  1809 h / 100
+[ 2841 ] Hour Meter +>10000 =
+  0 h / 100
+[ 2842 ] Active Power phase1 +/- =
+   W / 0.1
+[ 2843 ] Active Power phase2 +/- =
+   W / 0.1
+[ 2844 ] Active Power phase3 +/- =
+   W / 0.1
+[ 2845 ] Reactive Power phase1 +/- =
+   var / 0.1
+[ 2846 ] Reactive Power phase2 +/- =
+   var / 0.1
+[ 2847 ] Reactive Power phase3 +/- =
+   var / 0.1
+[ 2848 ] Apparent Power phase1 =
+  0 VA / 0.1
+[ 513 ] Current Transformer secondary : 1: 1 A  =
+  5 A
+[ 514 ] Current Transformer primary =
+  244 A
+M
+
 */
 
