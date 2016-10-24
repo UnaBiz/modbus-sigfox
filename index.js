@@ -4,7 +4,12 @@ gsheets --key=1Spf1qlaAH2hzwa2MvuDNv2pzeSAhlU451IRfEV6stMI --title="all-types.h"
 'use strict';
 
 const spreadsheet_key = '1Spf1qlaAH2hzwa2MvuDNv2pzeSAhlU451IRfEV6stMI';
-const filenames = ['all-names.h'];
+const filenames = [
+  'all-types.h',
+  'all-registers.h',
+  'all-names.h',
+  'all-units.h'
+];
 
 const fs = require('fs');
 const gsheets = require('gsheets');

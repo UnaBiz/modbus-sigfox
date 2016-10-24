@@ -1,11 +1,11 @@
-//  COPY THE CONTENTS FROM https://docs.google.com/spreadsheets/d/1Spf1qlaAH2hzwa2MvuDNv2pzeSAhlU451IRfEV6stMI/edit?usp=sharing
+//  Generated list of registers based on Modbus table.
+//  Format: transmit, address, size, name_index, unit_index, type
 #ifndef ALL_REGISTERS_H
 #define ALL_REGISTERS_H
-
 #include <Arduino.h>
 #include "Flash/src/Flash.h"
+FLASH_TABLE(uint16_t, all_registers, 6,
 
-FLASH_TABLE(uint16_t, all_registers, 6,  //  Generated list of registers based on Modbus table.
 { 0, 4098, 8, 2282, 23, 7 },  //  TC list :TC 1 / TC2 / TC3 / TC4 / TC5 /  / A
 
 { 0, 57346, 1, 609, 23, 4 },  //  Current Transformer primary / A
@@ -184,6 +184,7 @@ FLASH_TABLE(uint16_t, all_registers, 6,  //  Generated list of registers based o
 { 0, 36176, 1, 527, 0, 8 },  //  Current alarm on lower threshold cause:0 / - / 1000
 
 { 0, 36179, 1, 568, 0, 8 },  //  Current alarm on upper threshold cause:0 / - / 1000
+
 { 0, 36820, 1, 0, 23, 8 },  //  Action Calib / A
 { 0, 36821, 1, 2205, 23, 8 },  //  Set Relais Impul / A
 { 0, 36822, 1, 427, 23, 8 },  //  Clr Relais Impulsion / A
@@ -242,6 +243,6 @@ FLASH_TABLE(uint16_t, all_registers, 6,  //  Generated list of registers based o
 
 { 0, 513, 1, 637, 23, 8 },  //  Current Transformer secondary : 1: 1 A 5 / A
 { 0, 514, 1, 609, 23, 8 },  //  Current Transformer primary / A
-);
 
+);
 #endif  //  ALL_REGISTERS_H
