@@ -1,7 +1,7 @@
 //  COPY THE CONTENTS FROM https://docs.google.com/spreadsheets/d/1Spf1qlaAH2hzwa2MvuDNv2pzeSAhlU451IRfEV6stMI/edit?usp=sharing
-//  Define the Modbus types.
-#ifndef MODBUS_TYPES_H
-#define MODBUS_TYPES_H
+//  Define the Modbus register types.
+#ifndef ALL_TYPES_H
+#define ALL_TYPES_H
 
 //  Declare register types.
 enum MODBUS_TYPES {
@@ -13,4 +13,4 @@ enum MODBUS_TYPES {
   TYPE_U8 = 8,
 };
 
-#endif  //  MODBUS_TYPES_H
+#endif  //  ALL_TYPES_H
