@@ -1,0 +1,22 @@
+{
+  "name": "modbus-sigfox",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UnaBiz/modbus-sigfox.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UnaBiz/modbus-sigfox/issues"
+  },
+  "homepage": "https://github.com/UnaBiz/modbus-sigfox#readme",
+  "dependencies": {
+    "gsheets": "^1.2.3"
+  }
+}
