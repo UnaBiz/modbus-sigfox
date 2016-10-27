@@ -31,7 +31,7 @@ const uint16_t max_name_length = 40; const char all_names[] PROGMEM =
 "Current alarm on lower threshold cause:0\0"
 "Current alarm on upper threshold cause:0\0"
 "Current Transformer primary\0"
-"Current Transformer secondary : 1: 1 A 5\0"
+"Current Transformer secondary 11A 55A\0"
 "Dphasage Phase 1\0"
 "Dphasage Phase 2\0"
 "Dphasage Phase 3\0"
