@@ -19,6 +19,9 @@
 //  FTDI RX -> Arduino D7
 //  FTDI GND -> Arduino GND
 
+////
+#define DEBUG
+
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include "unabiz-arduino-master/Akeru.h"
@@ -140,7 +143,7 @@ void forwardLoop() {
     forwardSerial.write((uint8_t) Serial.read());
   }
 }
-#else
+#else  //  FORWARD_MODE
 
 void parseType(Register reg, uint16_t data[], String &displayValue, String &transmitValue) {
   //  Parse register types for display and for sending to SIGFOX.
@@ -392,7 +395,44 @@ void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
   if (reg.transmit)
     msg = msg + transmitValue;  //  Send to SIGFOX if we should transmit.
 }
-#endif
+
+const uint16_t bytesPerPage = 12;
+const uint16_t headerBytesPerPage = 1;
+const uint16_t dataBytesPerPage = bytesPerPage - headerBytesPerPage;
+static String msg = "";
+static char pageNum = 0;
+
+void readRegisters() {
+  //  Prepare SIGFOX message based on Modbus registers.  Must not exceed 12 characters.
+  //  Based on https://github.com/4-20ma/ModbusMaster
+  //  and https://www.cooking-hacks.com/documentation/tutorials/modbus-module-shield-tutorial-for-arduino-raspberry-pi-intel-galileo/  static uint32_t i;
+  static uint32_t loop_count = 0;
+  static uint16_t data[max_register_size];
+
+  //  Read all registers and send selected registers to SIGFOX.
+  clearRegisterCache();  //  Don't reuse the past register data.
+  debugPrint("\r\n\r\n------ Loop "); debugPrint(String(loop_count++).c_str()); debugPrint("\r\n");
+  for (uint16_t r = 0; r < all_registers.rows(); r++) {
+    //  Read Modbus registers to data buffer.
+    Register reg = {
+        (boolean) all_registers[r][0], all_registers[r][1], all_registers[r][2],
+        all_registers[r][3], all_registers[r][4], all_registers[r][5],
+    };
+#ifdef READ_ALL_REGISTERS
+    //  Read all registers.
+#else
+    //  Read only the registers we should transmit.
+    if (!reg.transmit) continue;
+#endif READ_ALL_REGISTERS
+    const uint8_t result = readHoldingRegister(reg, data);
+    if (result == node.ku8MBSuccess)
+      concatHoldingRegister(msg, reg, data);  //  Send data to SIGFOX.
+    else if (reg.transmit)
+      msg = msg + akeru.toHex(result);  //  Send error byte to SIGFOX.
+  }
+}
+
+#endif  //  FORWARD_MODE
 
 //  End Sensor Declaration
 ////////////////////////////////////////////////////////////
@@ -462,27 +502,9 @@ void loop()
   return forwardLoop();
 
 #else  //  FORWARD_MODE
-  //  Prepare SIGFOX message based on Modbus registers.  Must not exceed 12 characters.
-  //  Based on https://github.com/4-20ma/ModbusMaster
-  //  and https://www.cooking-hacks.com/documentation/tutorials/modbus-module-shield-tutorial-for-arduino-raspberry-pi-intel-galileo/  static uint32_t i;
-  static uint32_t loop_count = 0;
-  static uint16_t data[max_register_size];
-
-  //  Read all registers and send selected registers to SIGFOX.
-  clearRegisterCache();  //  Don't reuse the past register data.
-  String msg = "";
-  debugPrint("\r\n\r\n------ Loop "); debugPrint(String(loop_count++).c_str()); debugPrint("\r\n");
-  for (uint16_t r = 0; r < all_registers.rows(); r++) {
-    //  Read Modbus registers to data buffer.
-    Register reg = {
-        (boolean) all_registers[r][0], all_registers[r][1], all_registers[r][2],
-        all_registers[r][3], all_registers[r][4], all_registers[r][5],
-    };
-    const uint8_t result = readHoldingRegister(reg, data);
-    if (result == node.ku8MBSuccess)
-      concatHoldingRegister(msg, reg, data);  //  Send data to SIGFOX.
-    else if (reg.transmit)
-      msg = msg + akeru.toHex(result);  //  Send error byte to SIGFOX.
+  if (msg.length() == 0) {
+    readRegisters();
+    pageNum = 0;
   }
 #endif  //  FORWARD_MODE
 
@@ -493,30 +515,28 @@ void loop()
   //  Begin SIGFOX Module Loop
 
   //  Send sensor data.  Break the message into pages of 12 bytes and send.
-  const uint16_t bytesPerPage = 12;
-  const uint16_t headerBytesPerPage = 1;
-  const uint16_t dataBytesPerPage = bytesPerPage - headerBytesPerPage;
-  char pageNum = 0;
-  for (;;) {
-    if (msg.length() == 0) break;
-    String pageData = msg.substring(0, msg.length() > dataBytesPerPage ?
-                                       dataBytesPerPage : msg.length());
-    pageData = akeru.toHex(pageNum) + pageData;
-    debugSerial.print("Page ");  debugSerial.print(pageNum);
+  if (msg.length() > 0) {
+    uint16_t bytesToSend = dataBytesPerPage;
+    if (dataBytesPerPage > msg.length()) bytesToSend = msg.length();
+    String pageData = akeru.toHex(pageNum) + msg.substring(0, bytesToSend);
+    msg = msg.substring(bytesToSend);
+
+    debugSerial.print("Sending page ");  debugSerial.println((int) pageNum);
+    debugSerial.println(pageData);
     if (akeru.sendString(pageData)) {
-      debugSerial.println(" sent");
+      debugSerial.println("Page sent");
     } else {
-      debugSerial.println(" not sent");
+      debugSerial.println("Page NOT sent");
     }
     pageNum++;
-    delay(2000);
   }
 
   //  End SIGFOX Module Loop
   ////////////////////////////////////////////////////////////
 
   //  Wait a while before looping.
-  delay(1000);  //  1 second.
+  debugSerial.println("Sleeping...");
+  delay(5000);  //  2 seconds.
 }
 
 /*
