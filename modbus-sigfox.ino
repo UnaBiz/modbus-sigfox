@@ -389,7 +389,7 @@ void concatHoldingRegister(String msg, Register reg, uint16_t data[]) {
   debugSerial.print(name); debugSerial.print(F(" =\r\n  "));
   debugSerial.print(displayValue + " " + unit);
   debugSerial.println(F(""));
-  if (reg.transmit && (msg + transmitValue).length() <= 24)
+  if (reg.transmit)
     msg = msg + transmitValue;  //  Send to SIGFOX if we should transmit.
 }
 #endif
@@ -492,11 +492,24 @@ void loop()
   ////////////////////////////////////////////////////////////
   //  Begin SIGFOX Module Loop
 
-  //  Send sensor data.
-  if (akeru.sendString(msg)) {
-    debugSerial.println("Message sent");
-  } else {
-    debugSerial.println("Message not sent");
+  //  Send sensor data.  Break the message into pages of 12 bytes and send.
+  const uint16_t bytesPerPage = 12;
+  const uint16_t headerBytesPerPage = 1;
+  const uint16_t dataBytesPerPage = bytesPerPage - headerBytesPerPage;
+  char pageNum = 0;
+  for (;;) {
+    if (msg.length() == 0) break;
+    String pageData = msg.substring(0, msg.length() > dataBytesPerPage ?
+                                       dataBytesPerPage : msg.length());
+    pageData = akeru.toHex(pageNum) + pageData;
+    debugSerial.print("Page ");  debugSerial.print(pageNum);
+    if (akeru.sendString(pageData)) {
+      debugSerial.println(" sent");
+    } else {
+      debugSerial.println(" not sent");
+    }
+    pageNum++;
+    delay(2000);
   }
 
   //  End SIGFOX Module Loop
