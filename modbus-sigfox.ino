@@ -423,7 +423,7 @@ void readRegisters() {
 #else
     //  Read only the registers we should transmit.
     if (!reg.transmit) continue;
-#endif READ_ALL_REGISTERS
+#endif  //  READ_ALL_REGISTERS
     const uint8_t result = readHoldingRegister(reg, data);
     if (result == node.ku8MBSuccess)
       concatHoldingRegister(msg, reg, data);  //  Send data to SIGFOX.
@@ -523,7 +523,7 @@ void loop()
 
     debugSerial.print("Sending page ");  debugSerial.println((int) pageNum);
     debugSerial.println(pageData);
-    if (akeru.sendString(pageData)) {
+    if (akeru.sendPayload(pageData)) {
       debugSerial.println("Page sent");
     } else {
       debugSerial.println("Page NOT sent");
