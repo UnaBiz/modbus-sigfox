@@ -1,3 +1,11 @@
+*.ino linguist-language=Arduino
+*.cpp linguist-language=Arduino
+*.h linguist-language=Arduino
+*.cmake linguist-language=Arduino
+docs/* linguist-documentation
+Flash/* linguist-vendored
+ModbusMaster/* linguist-vendored
+
 # Auto detect text files and perform LF normalization
 * text=auto
 
